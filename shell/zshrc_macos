@@ -1,0 +1,154 @@
+# ZSH Configuration for macOS
+# ===========================
+# Last updated: 2025-05-05
+#
+# Changes applied:
+# - Added '....' alias for navigating up three directory levels
+# - Ensured Emacs configuration in PATH
+# - Maintained comprehensive neofetch/fastfetch system info display
+# - Preserved Starship prompt configuration
+# 
+# Note: This file is designed to be symlinked from ~/.zshrc
+# rather than copied, ensuring a single source of truth for configuration.
+
+# Source Prezto if it exists (primary configuration system)
+if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
+    source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
+else
+    echo "Prezto not found at ${ZDOTDIR:-$HOME}/.zprezto. Please install it first."
+    # Fallback to basic ZSH config when Prezto is not available
+    setopt PROMPT_SUBST
+    PS1='%n@%m:%~%# '
+
+    # Since Prezto is not available, set some basic ZSH options
+    setopt AUTO_CD
+    setopt EXTENDED_GLOB
+    setopt SHARE_HISTORY
+    setopt HIST_IGNORE_SPACE
+    setopt HIST_IGNORE_DUPS
+    setopt HIST_EXPIRE_DUPS_FIRST
+    
+    # Basic history configuration
+    HISTFILE=~/.zsh_history
+    HISTSIZE=10000
+    SAVEHIST=10000
+    
+    # Basic directory options
+    setopt AUTO_PUSHD
+    setopt PUSHD_IGNORE_DUPS
+    setopt PUSHD_SILENT
+    
+    # Basic auto/tab completion
+    autoload -Uz compinit
+    compinit
+    zstyle ':completion:*' menu select
+    zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+    _comp_options+=(globdots)        # Include hidden files
+fi
+
+# Path configuration
+typeset -U path  # Ensure unique paths
+
+# Common paths
+[[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path)
+# Emacs config no longer backed up
+[[ -d "$HOME/dotfiles/scripts" ]] && path=("$HOME/dotfiles/scripts" $path)
+
+# macOS paths
+[[ -d "/opt/homebrew/bin" ]] && path=("/opt/homebrew/bin" $path)
+[[ -d "/opt/homebrew/opt/coreutils/libexec/gnubin" ]] && \
+    path=("/opt/homebrew/opt/coreutils/libexec/gnubin" $path)
+
+export PATH
+
+# Aliases
+alias l='ls -la'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias update='brew update && brew upgrade'
+alias brewup='brew update && brew upgrade'
+
+
+# Pyenv configuration
+if command -v pyenv &>/dev/null; then
+    export PYENV_ROOT="$HOME/.pyenv"
+    [[ -d $PYENV_ROOT/bin ]] && path=("$PYENV_ROOT/bin" $path)
+    eval "$(pyenv init -)"
+fi
+
+# Editor configuration
+if command -v nvim &>/dev/null; then
+    export EDITOR="nvim"
+    alias e="nvim"
+else
+    export EDITOR="nano"
+fi
+
+# Set VISUAL editor
+if command -v code &>/dev/null; then
+    export VISUAL="code"
+else
+    export VISUAL="$EDITOR"
+fi
+
+# Homebrew - only evaluate if it exists
+if command -v brew &>/dev/null; then
+    eval $(brew shellenv)
+elif [ -f /opt/homebrew/bin/brew ]; then
+    eval $(/opt/homebrew/bin/brew shellenv)
+elif [ -f /usr/local/bin/brew ]; then
+    eval $(/usr/local/bin/brew shellenv)
+fi
+
+
+# Check for and configure modern command-line tools
+
+if command -v eza &>/dev/null; then
+    alias l='eza -l -a -g --group-directories-first --time-style=long-iso --hyperlink --classify=always -h -B -M'
+elif command -v lsd &>/dev/null; then
+    alias l='lsd -la --group-dirs first'
+fi
+
+# tar with Mac-specific exclusions
+alias tar="tar --exclude='*/.DS_Store'\
+               --exclude='*/.fseventsd'\
+               --exclude='*/__MACOSX'\
+               --exclude='*/.Spotlight-V100'\
+               --exclude='*/._*'"
+
+# Network utilities
+ipv4() {
+    curl -4fsSL https://ifconfig.me
+}
+ipv6() {
+    command -v ip >/dev/null 2>&1 && { ip -6 addr show scope global 2>/dev/null | grep -oP '(?<=inet6 )[0-9a-fA-F:]+' || ip -6 addr show scope link 2>/dev/null | grep -oP '(?<=inet6 )[0-9a-fA-F:]+'; } || { ifconfig 2>/dev/null | grep 'inet6' | grep -v 'fe80:' | awk '{print $2}' || ifconfig 2>/dev/null | grep 'inet6' | grep 'fe80:' | awk '{print $2}'; } || echo "No IPv6 address found"
+}
+
+# Git ignore generator
+function gi() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
+
+# Notetaking Stuff
+upnote_add() {
+  ~/dotfiles/scripts/upnote_add.py "$@" > /dev/null 2>&1
+}
+
+# Prompt is now handled by Prezto or fallback configuration
+
+  autoload -Uz promptinit
+  promptinit
+  prompt paradox
+  RPROMPT=''
+
+# Check for fastfetch/neofetch before system information display
+if command -v fastfetch &>/dev/null; then
+    clear
+    fastfetch --structure Break:Break:Break:Title:Break:OS:CPU:GPU:Disk:Memory:Uptime:Display:PowerAdapter:Battery:Wifi:LocalIp:PublicIp
+fi
+
+# Emacs path removed - no longer backed up
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/erica/.lmstudio/bin"
+# End of LM Studio CLI section
+

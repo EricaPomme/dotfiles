@@ -1,0 +1,17 @@
+# macOS system files
+.DS_Store
+
+# Backup files (timestamped or temp)
+*.backup
+*~ 
+
+# Backup versions of packagelists
+packagelists/*.backup
+
+# Local overrides or sensitive files
+ssh/config         # if you accidentally create a real config here
+*.local            # local-only config
+
+# Editor-specific junk
+.vscode/
+*.log

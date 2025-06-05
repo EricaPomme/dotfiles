@@ -1,0 +1,32 @@
+eza
+fzf
+tmux
+zsh
+git
+pyenv
+neovim
+ripgrep
+coreutils
+fastfetch
+htop
+pandoc
+curl
+wget
+nmap
+# docker-cli has been removed as it should be installed via the Docker cask
+gnupg
+ssh-copy-id
+fd
+jq
+cmake
+make
+go
+lua
+node  # Includes npm
+python
+bat
+tldr
+tree
+ykman
+shfmt
+git-lfs
