@@ -277,6 +277,23 @@ setup_dotfiles() {
   local EMACS_CONFIG_DIR="${HOME}/.doom.d"
 
   # Use a fully POSIX-compliant approach with newline-separated pairs
+  # OS-specific zshrc selection and symlink configuration
+  case "$OS" in
+    macos)
+      ZSHRC_SOURCE="shell/zshrc_macos"
+      OS_SPECIFIC_SYMLINKS="hammerspoon|${HOME}/.hammerspoon"
+      ;;
+    linux)
+      ZSHRC_SOURCE="shell/zshrc_linux"
+      OS_SPECIFIC_SYMLINKS=""
+      ;;
+    *)
+      log_warning "Unknown OS: $OS, defaulting to Linux zshrc"
+      ZSHRC_SOURCE="shell/zshrc_linux"
+      OS_SPECIFIC_SYMLINKS=""
+      ;;
+  esac
+
   symlink_pairs="
 # Format: source|destination
 # Emacs/Doom Emacs configuration files are no longer backed up
@@ -285,8 +302,8 @@ setup_dotfiles() {
 # emacs/doom.d/packages.el|${EMACS_CONFIG_DIR}/packages.el
 nvim/config|${HOME}/.config/nvim
 tmux/.tmux.conf.local|${HOME}/.tmux.conf.local
-shell/zshrc_macos|${HOME}/.zshrc
-hammerspoon|${HOME}/.hammerspoon
+${ZSHRC_SOURCE}|${HOME}/.zshrc
+${OS_SPECIFIC_SYMLINKS}
 "
 
   echo "${symlink_pairs}" | grep -v "^#" | grep -v "^$" | while IFS="|" read -r src dst; do

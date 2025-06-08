@@ -1,4 +1,14 @@
 # ZSH Configuration for Linux
+# ==========================
+# Last updated: 2025-06-07
+#
+# Changes applied:
+# - Restructured to follow macOS theme and organization
+# - Enhanced fallback configuration when Prezto is not available
+# - Improved editor configuration priority (nvim > code > vim > nano)
+# - Better modern command-line tool integration
+# - Added comprehensive directory navigation aliases
+# - Enhanced path management with dotfiles scripts
 
 # Source Prezto if it exists (primary configuration system)
 if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
@@ -8,7 +18,7 @@ else
     # Fallback to basic ZSH config when Prezto is not available
     setopt PROMPT_SUBST
     PS1='%n@%m:%~%# '
-    
+
     # Since Prezto is not available, set some basic ZSH options
     setopt AUTO_CD
     setopt EXTENDED_GLOB
@@ -21,6 +31,18 @@ else
     HISTFILE=~/.zsh_history
     HISTSIZE=10000
     SAVEHIST=10000
+    
+    # Basic directory options
+    setopt AUTO_PUSHD
+    setopt PUSHD_IGNORE_DUPS
+    setopt PUSHD_SILENT
+    
+    # Basic auto/tab completion
+    autoload -Uz compinit
+    compinit
+    zstyle ':completion:*' menu select
+    zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+    _comp_options+=(globdots)        # Include hidden files
 fi
 
 # Path configuration
@@ -28,18 +50,43 @@ typeset -U path  # Ensure unique paths
 
 # Common paths
 [[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path)
-# Emacs path removed - no longer backed up
+[[ -d "$HOME/dotfiles/scripts" ]] && path=("$HOME/dotfiles/scripts" $path)
+
+# Linux-specific paths
+[[ -d "/usr/local/bin" ]] && path=("/usr/local/bin" $path)
+[[ -d "/opt/local/bin" ]] && path=("/opt/local/bin" $path)
 
 export PATH
 
 # Aliases
+alias l='ls -la'
 alias ll='ls -lah'
 alias la='ls -A'
-alias l='ls -CF'
 alias ..='cd ..'
 alias ...='cd ../..'
-alias update='sudo dnf update'
-alias install='sudo dnf install'
+alias ....='cd ../../..'
+
+# Distribution-specific package management aliases
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    case "$ID" in
+        fedora)
+            alias update='sudo dnf update'
+            alias install='sudo dnf install'
+            alias search='dnf search'
+            ;;
+        ubuntu|debian)
+            alias update='sudo apt update && sudo apt upgrade'
+            alias install='sudo apt install'
+            alias search='apt search'
+            ;;
+        arch|manjaro)
+            alias update='sudo pacman -Syu'
+            alias install='sudo pacman -S'
+            alias search='pacman -Ss'
+            ;;
+    esac
+fi
 
 
 # Pyenv configuration
@@ -49,14 +96,19 @@ if command -v pyenv &>/dev/null; then
     eval "$(pyenv init -)"
 fi
 
-# Editor configuration
-if command -v code &>/dev/null; then
+# Editor configuration (priority: nvim > code > vim > nano)
+if command -v nvim &>/dev/null; then
+    export EDITOR="nvim"
+    alias e="nvim"
+elif command -v code &>/dev/null; then
     export EDITOR="code -w"
     alias e='code -w'
 elif command -v vim &>/dev/null; then
     export EDITOR="vim"
+    alias e="vim"
 else
     export EDITOR="nano"
+    alias e="nano"
 fi
 
 # Set VISUAL editor
@@ -66,15 +118,6 @@ else
     export VISUAL="$EDITOR"
 fi
 
-
-# Use Prezto's prompt system by default
-# Only load our own prompt if Prezto is not available
-if [[ ! -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
-    autoload -Uz promptinit
-    promptinit
-    prompt paradox
-    RPROMPT=''
-fi
 
 # Check for and configure modern command-line tools
 if command -v bat &>/dev/null; then
@@ -99,23 +142,23 @@ ipv4() {
     curl -4fsSL https://ifconfig.me
 }
 ipv6() {
-    command -v ip >/dev/null 2>&1 && { ip -6 addr show scope global 2>/dev/null | grep -oP '(?<=inet6 )[0-9a-fA-F:]+' || ip -6 addr show scope link 2>/dev/null | grep -oP '(?<=inet6 )[0-9a-fA-F:]+'; } || { ifconfig 2>/dev/null | grep 'inet6' | grep -v 'fe80:' | awk '{print $2}' || ifconfig 2>/dev/null | grep 'inet6' | grep 'fe80:' | awk '{print $2}'; } || echo "No IPv6 address found"
+    command -v ip > /dev/null 2>&1 && { ip -6 addr show scope global 2>/dev/null | grep -oP '(?<=inet6 )[0-9a-fA-F:]+' || ip -6 addr show scope link 2>/dev/null | grep -oP '(?<=inet6 )[0-9a-fA-F:]+'; } || { ifconfig 2>/dev/null | grep 'inet6' | grep -v 'fe80:' | awk '{print $2}' || ifconfig 2>/dev/null | grep 'inet6' | grep 'fe80:' | awk '{print $2}'; } || echo "No IPv6 address found"
 }
 
 # Git ignore generator
 function gi() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
-
 
 # Linux-specific utilities
 if command -v xdg-open > /dev/null; then
     alias open='xdg-open'
 fi
 
-# Distribution detection (without package management aliases)
-if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    # Distribution name is available as $ID if needed elsewhere
-    # Example usage: echo "Running on $ID"
+# Prompt is now handled by Prezto or fallback configuration
+if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
+    autoload -Uz promptinit
+    promptinit
+    prompt paradox
+    RPROMPT=''
 fi
 
 # Check for fastfetch/neofetch before system information display

@@ -5,6 +5,7 @@ tmux                    # Terminal multiplexer
 lsd                     # Modern ls replacement (ARM64 compatible)
 fzf                     # Fuzzy finder
 util-linux              # Linux system utilities
+sccache                 # Compiler cache for faster builds
 
 # Development tools
 git                     # Version control
@@ -43,6 +44,7 @@ dnf-utils              # DNF utilities
 ShellCheck              # Shell script analysis tool
 strace                  # Diagnostic and debugging tool
 flatpak                 # Application sandboxing and distribution framework
+wl-clipboard            # Wayland clipboard utilities
 # mlocate not available in repos for ARM64 - use native find command instead
 
 # Network tools
