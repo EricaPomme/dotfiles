@@ -301,7 +301,7 @@ setup_dotfiles() {
       ;;
   esac
 
-  symlink_pairs="$(cat <<'EOF'
+  symlink_pairs="$(cat <<EOF
 # Format: source|destination
 nvim/config|${HOME}/.config/nvim
 tmux/.tmux.conf.local|${HOME}/.tmux.conf.local
