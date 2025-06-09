@@ -7,6 +7,29 @@ DEBUG=${DEBUG:-false}
 # Load shared logging and utility functions
 source "$(dirname "$0")/install.sh"
 
+# Pull updates for any git-based tools installed by install.sh
+update_git_repos() {
+  log_debug "entering update_git_repos($(join_args "$@"))"
+
+  if [ -d "$HOME/.zprezto" ]; then
+    log_info "Updating Prezto..."
+    git -C "$HOME/.zprezto" pull --ff-only \
+      || log_warning "Failed to update Prezto"
+  else
+    log_debug "Prezto not installed"
+  fi
+
+  if [ -d "$HOME/.tmux" ]; then
+    log_info "Updating oh-my-tmux..."
+    git -C "$HOME/.tmux" pull --ff-only \
+      || log_warning "Failed to update oh-my-tmux"
+  else
+    log_debug "oh-my-tmux not installed"
+  fi
+
+  log_debug "exiting update_git_repos($(join_args "$@"))"
+}
+
 function update_all() {
   log_debug "entering update_all($(join_args "$@"))"
 
@@ -62,6 +85,8 @@ function update_all() {
     log_info "Updating global NPM packages..."
     npm update -g || log_warning "NPM update failed"
   fi
+
+  update_git_repos
 
   log_debug "exiting update_all($(join_args "$@"))"
 }
