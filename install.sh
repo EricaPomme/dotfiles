@@ -4,6 +4,15 @@ set -eu
 
 DEBUG=${DEBUG:-false}
 
+# Bypass controls for major sections
+BYPASS_VERIFY_ESSENTIALS=${BYPASS_VERIFY_ESSENTIALS:-false}
+BYPASS_GIT_REPOS=${BYPASS_GIT_REPOS:-false}
+BYPASS_OS_PACKAGES=${BYPASS_OS_PACKAGES:-false}
+BYPASS_CARGO=${BYPASS_CARGO:-false}
+BYPASS_NPM=${BYPASS_NPM:-false}
+BYPASS_SETUP_DOTFILES=${BYPASS_SETUP_DOTFILES:-false}
+BYPASS_MACOS_DEFAULTS=${BYPASS_MACOS_DEFAULTS:-false}
+
 # Logging helpers
 
 RED='\033[0;31m'
@@ -159,8 +168,10 @@ read_packagelist() {
 #   Package installation failures are logged as warnings but don't cause the function to exit
 install_packages() {
   log_debug "entering install_packages($(join_args "$@"))"
-  case "$OS" in
-    macos)
+
+  if ! $BYPASS_OS_PACKAGES; then
+    case "$OS" in
+      macos)
       log_debug "installing macOS packages"
       if [ -f "packagelists/homebrew.packages" ]; then
         check_command brew
@@ -216,19 +227,26 @@ install_packages() {
         read_packagelist "packagelists/flatpak" | xargs -I{} flatpak install -y --noninteractive flathub {} || log_warning "Some flatpak installs may have failed"
       fi
       ;;
-  esac
+    esac
+  else
+    log_info "BYPASS_OS_PACKAGES is true, skipping OS package installation"
+  fi
 
   log_debug "installing platform-agnostic packages"
-  if [ -f "packagelists/cargo" ]; then
+  if ! $BYPASS_CARGO && [ -f "packagelists/cargo" ]; then
     check_command cargo
     log_info "Installing Cargo packages..."
     read_packagelist "packagelists/cargo" | xargs cargo install || log_warning "Some cargo installs may have failed"
+  elif $BYPASS_CARGO; then
+    log_info "BYPASS_CARGO is true, skipping Cargo packages"
   fi
 
-  if [ -f "packagelists/npm" ]; then
+  if ! $BYPASS_NPM && [ -f "packagelists/npm" ]; then
     check_command npm
     log_info "Installing NPM global packages..."
     read_packagelist "packagelists/npm" | xargs npm install -g || log_warning "Some npm installs may have failed"
+  elif $BYPASS_NPM; then
+    log_info "BYPASS_NPM is true, skipping NPM packages"
   fi
 
   log_debug "exiting install_packages($(join_args "$@"))"
@@ -492,17 +510,38 @@ main() {
     return
   fi
 
-  verify_essentials
+  if ! $BYPASS_VERIFY_ESSENTIALS; then
+    verify_essentials
+  else
+    log_info "BYPASS_VERIFY_ESSENTIALS is true, skipping verify_essentials"
+  fi
 
-  install_git_repos
+  if ! $BYPASS_GIT_REPOS; then
+    install_git_repos
+  else
+    log_info "BYPASS_GIT_REPOS is true, skipping install_git_repos"
+  fi
 
-  # Unpack the boxes
-  install_packages
-  setup_dotfiles
+  if $BYPASS_OS_PACKAGES && $BYPASS_CARGO && $BYPASS_NPM; then
+    log_info "All package bypass flags are true, skipping install_packages"
+  else
+    # Unpack the boxes
+    install_packages
+  fi
+
+  if ! $BYPASS_SETUP_DOTFILES; then
+    setup_dotfiles
+  else
+    log_info "BYPASS_SETUP_DOTFILES is true, skipping setup_dotfiles"
+  fi
 
   # OS Specific calls
   if [ "$OS" = "macos" ]; then
-    set_macos_defaults
+    if ! $BYPASS_MACOS_DEFAULTS; then
+      set_macos_defaults
+    else
+      log_info "BYPASS_MACOS_DEFAULTS is true, skipping set_macos_defaults"
+    fi
   fi
 
   log_debug "exiting main($(join_args "$@"))"
