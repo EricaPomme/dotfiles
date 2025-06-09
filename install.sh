@@ -369,6 +369,49 @@ verify_essentials() {
   log_debug "exiting verify_essentials($(join_args "$@"))"
 }
 
+# Clones git-based tools like Prezto and oh-my-tmux
+#
+# This function checks if each repository has already been installed in the
+# user's home directory. If not, it clones the repository and performs any
+# required setup. Progress is reported using the standard logging helpers.
+install_git_repos() {
+  log_debug "entering install_git_repos($(join_args "$@"))"
+
+  if [ ! -d "$HOME/.zprezto" ]; then
+    log_info "Cloning Prezto..."
+    git clone --recursive https://github.com/sorin-ionescu/prezto.git "$HOME/.zprezto" \
+      || log_warning "Failed to clone Prezto"
+    log_info "Linking Prezto runcoms"
+    for rcfile in "$HOME"/.zprezto/runcoms/*; do
+      [ "$(basename "$rcfile")" = "README.md" ] && continue
+      target="$HOME/.${rcfile##*/}"
+      if [ -e "$target" ]; then
+        log_debug "$target already exists"
+      else
+        ln -s "$rcfile" "$target"
+      fi
+    done
+  else
+    log_info "Prezto already installed"
+  fi
+
+  if [ ! -d "$HOME/.tmux" ]; then
+    log_info "Cloning oh-my-tmux..."
+    git clone https://github.com/gpakosz/.tmux.git "$HOME/.tmux" \
+      || log_warning "Failed to clone oh-my-tmux"
+    ln -sf "$HOME/.tmux/.tmux.conf" "$HOME/.tmux.conf"
+    if [ -e "$HOME/.tmux.conf.local" ]; then
+      log_debug "$HOME/.tmux.conf.local already exists"
+    else
+      ln -s "$PWD/tmux/.tmux.conf.local" "$HOME/.tmux.conf.local"
+    fi
+  else
+    log_info "oh-my-tmux already installed"
+  fi
+
+  log_debug "exiting install_git_repos($(join_args "$@"))"
+}
+
 # Configures macOS system defaults for improved usability
 #
 # This function applies a series of macOS-specific system preferences and UI settings
@@ -450,6 +493,8 @@ main() {
   fi
 
   verify_essentials
+
+  install_git_repos
 
   # Unpack the boxes
   install_packages
