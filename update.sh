@@ -41,6 +41,12 @@ function update_all() {
             sudo pacman -Syu --noconfirm || log_warning "Pacman update failed"
           fi
           ;;
+        nixos)
+          if command -v nix-env &>/dev/null; then
+            log_info "Updating Nix packages..."
+            nix-env --upgrade || log_warning "Nix update failed"
+          fi
+          ;;
       esac
       ;;
   esac
