@@ -482,9 +482,9 @@ set_macos_defaults() {
   killall Dock >/dev/null 2>&1 || log_warning "Dock was not running"
   
   # Always return success, even if some settings couldn't be applied
+  log_debug "exiting set_macos_defaults($(join_args "$@"))"
   return 0
 
-  log_debug "exiting set_macos_defaults($(join_args "$@"))"
 }
 
 # Main entry point for the script
