@@ -14,5 +14,8 @@ NixOS support is intentionally lightweight. If you manage packages declaratively
 
 ## Usage
 
-Run `./install.sh` to set up symlinks and install packages for your system. Run `./update.sh` to update installed packages.
+Run `./install.sh` to set up symlinks and install packages for your system. The
+script also clones useful git-based tools like **Prezto** and **oh-my-tmux** and
+performs their recommended setup steps automatically. Run `./update.sh` to
+update installed packages.
 
