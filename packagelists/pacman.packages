@@ -1,0 +1,25 @@
+# Pacman package list for Arch-based distributions
+# Format: one package name per line
+# Lines starting with # are comments and will be ignored
+
+# Terminal utilities
+zsh
+fzf
+tmux
+lsd
+fastfetch
+ripgrep
+fd
+bat
+
+# Development tools
+git
+neovim
+python
+gcc
+make
+
+# Networking tools
+curl
+wget
+nmap

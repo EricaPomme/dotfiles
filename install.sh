@@ -188,6 +188,13 @@ install_packages() {
             read_packagelist "packagelists/fedora.packages" | xargs sudo dnf install -y || log_warning "Some dnf installs may have failed"
           fi
           ;;
+        arch | endeavouros | cachyos | garuda)
+          if [ -f "packagelists/pacman.packages" ]; then
+            check_command pacman
+            log_info "Installing Pacman packages..."
+            read_packagelist "packagelists/pacman.packages" | xargs -r sudo pacman -S --noconfirm --needed || log_warning "Some pacman installs may have failed"
+          fi
+          ;;
         *)
           log_warning "Unsupported Linux distribution: $DISTRO_ID"
           ;;
