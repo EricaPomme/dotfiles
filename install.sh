@@ -283,13 +283,14 @@ setup_dotfiles() {
       ;;
   esac
 
-  symlink_pairs="
+  symlink_pairs="$(cat <<'EOF'
 # Format: source|destination
-  nvim/config|${HOME}/.config/nvim
-  tmux/.tmux.conf.local|${HOME}/.tmux.conf.local
-  ${ZSHRC_SOURCE}|${HOME}/.zshrc
-  ${OS_SPECIFIC_SYMLINKS}
-"
+nvim/config|${HOME}/.config/nvim
+tmux/.tmux.conf.local|${HOME}/.tmux.conf.local
+${ZSHRC_SOURCE}|${HOME}/.zshrc
+${OS_SPECIFIC_SYMLINKS}
+EOF
+)"
 
   echo "${symlink_pairs}" | grep -v "^#" | grep -v "^$" | while IFS="|" read -r src dst; do
     # Skip empty lines
