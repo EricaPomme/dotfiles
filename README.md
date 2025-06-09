@@ -19,3 +19,17 @@ script also clones useful git-based tools like **Prezto** and **oh-my-tmux** and
 performs their recommended setup steps automatically. Run `./update.sh` to
 update installed packages and refresh those git repositories.
 
+### Environment variables
+
+You can skip parts of the scripts by setting `BYPASS_*` flags before running
+them. For example:
+
+```sh
+BYPASS_CARGO=true ./install.sh
+```
+
+Available flags include `BYPASS_VERIFY_ESSENTIALS`, `BYPASS_GIT_REPOS`,
+`BYPASS_OS_PACKAGES`, `BYPASS_CARGO`, `BYPASS_NPM`, `BYPASS_SETUP_DOTFILES`,
+`BYPASS_MACOS_DEFAULTS` and `BYPASS_OS_UPDATES`. Setting `DEBUG=true` will
+enable verbose logging.
+
