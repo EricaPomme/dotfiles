@@ -35,6 +35,12 @@ function update_all() {
             sudo dnf upgrade -y || log_warning "DNF update failed"
           fi
           ;;
+        arch | endeavouros | cachyos | garuda)
+          if command -v pacman &>/dev/null; then
+            log_info "Updating Pacman..."
+            sudo pacman -Syu --noconfirm || log_warning "Pacman update failed"
+          fi
+          ;;
       esac
       ;;
   esac
