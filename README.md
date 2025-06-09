@@ -19,6 +19,11 @@ script also clones useful git-based tools like **Prezto** and **oh-my-tmux** and
 performs their recommended setup steps automatically. Run `./update.sh` to
 update installed packages and refresh those git repositories.
 
+> **Note**
+> The `install.sh` script relies on features specific to **Bash** such as
+> `local` variables and parameter expansion like `${VAR,,}`. Ensure that the
+> script is executed with `bash` rather than `sh`.
+
 ### Environment variables
 
 You can skip parts of the scripts by setting `BYPASS_*` flags before running
