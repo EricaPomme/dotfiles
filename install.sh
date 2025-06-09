@@ -74,21 +74,25 @@ check_command() {
 #
 # This function determines whether the script is running on Linux or macOS
 # by examining the output of 'uname -s'. It sets the global variable OS
-# to either "linux" or "macos" accordingly. If an unsupported operating
-# system is detected, the script will exit with an error.
+# to either "linux" or "macos" accordingly. If an unrecognized operating
+# system is detected, the global variable OS will be set to "unknown" and
+# the script will continue with limited functionality.
 #
 # Arguments:
 #   None
 #
 # Returns:
 #   None - Sets the global variable OS to the detected operating system
-#   Exits with error if an unsupported OS is detected
+#           (or "unknown" if unrecognized)
 detect_os() {
   log_debug "entering detect_os($(join_args "$@"))"
   case "$(uname -s)" in
     Linux*) OS="linux" ;;
     Darwin*) OS="macos" ;;
-    *) log_critical "Unsupported OS" ;;
+    *)
+      OS="unknown"
+      log_warning "Unrecognized OS: $(uname -s). Some features will be skipped."
+      ;;
   esac
   log_info "Detected OS: $OS"
   log_debug "exiting detect_os($(join_args "$@"))"
@@ -195,6 +199,13 @@ install_packages() {
             read_packagelist "packagelists/pacman.packages" | xargs -r sudo pacman -S --noconfirm --needed || log_warning "Some pacman installs may have failed"
           fi
           ;;
+        nixos)
+          if [ -f "packagelists/nix.packages" ]; then
+            check_command nix-env
+            log_info "Installing Nix packages..."
+            read_packagelist "packagelists/nix.packages" | xargs nix-env -iA nixos || log_warning "Some nix installs may have failed"
+          fi
+          ;;
         *)
           log_warning "Unsupported Linux distribution: $DISTRO_ID"
           ;;
@@ -223,38 +234,12 @@ install_packages() {
   log_debug "exiting install_packages($(join_args "$@"))"
 }
 
-# Installs or updates Doom Emacs configuration
-#
-# This function checks if Doom Emacs is already installed by looking for the
-# .emacs.d directory in the user's home directory. If it exists, the function
-# runs 'doom upgrade' and 'doom sync' to update the installation. If Doom Emacs
-# is not installed, it clones the Doom Emacs repository and runs the installer.
-#
-# Arguments:
-#   None
-#
-# Returns:
-#   0 - On successful execution (even if upgrade/sync operations fail)
-#   Upgrade/sync failures are logged as warnings but don't cause the function to exit
-setup_doom_emacs() {
-  log_debug "entering setup_doom_emacs($(join_args "$@"))"
-  if [ -d "$HOME/.emacs.d" ]; then
-    log_info "Doom Emacs already installed, running upgrade and sync..."
-    "$HOME/.emacs.d/bin/doom" upgrade || log_warning "Doom upgrade failed"
-    "$HOME/.emacs.d/bin/doom" sync || log_warning "Doom sync failed"
-  else
-    log_info "Installing Doom Emacs..."
-    git clone --depth 1 https://github.com/doomemacs/doomemacs "$HOME/.emacs.d"
-    "$HOME/.emacs.d/bin/doom" install --yes
-  fi
-  log_debug "exiting setup_doom_emacs($(join_args "$@"))"
-}
 
 # Sets up dotfiles by creating symbolic links and configuring SSH
 #
 # This function creates symbolic links from the dotfiles repository to the
 # appropriate locations in the user's home directory. It handles configuration
-# files for Doom Emacs, tmux, zsh, and Hammerspoon. Additionally, it sets up
+# files for tmux, zsh, and Hammerspoon. Additionally, it sets up
 # an SSH config file if one doesn't already exist.
 #
 # The function checks if symlinks already exist and are correctly set before
@@ -280,9 +265,6 @@ setup_dotfiles() {
     log_warning "PWD was not defined, using current directory: $PWD"
   fi
 
-  # Define EMACS_CONFIG_DIR before using it
-  local EMACS_CONFIG_DIR="${HOME}/.doom.d"
-
   # Use a fully POSIX-compliant approach with newline-separated pairs
   # OS-specific zshrc selection and symlink configuration
   case "$OS" in
@@ -303,14 +285,10 @@ setup_dotfiles() {
 
   symlink_pairs="
 # Format: source|destination
-# Emacs/Doom Emacs configuration files are no longer backed up
-# emacs/doom.d/config.el|${EMACS_CONFIG_DIR}/config.el
-# emacs/doom.d/init.el|${EMACS_CONFIG_DIR}/init.el
-# emacs/doom.d/packages.el|${EMACS_CONFIG_DIR}/packages.el
-nvim/config|${HOME}/.config/nvim
-tmux/.tmux.conf.local|${HOME}/.tmux.conf.local
-${ZSHRC_SOURCE}|${HOME}/.zshrc
-${OS_SPECIFIC_SYMLINKS}
+  nvim/config|${HOME}/.config/nvim
+  tmux/.tmux.conf.local|${HOME}/.tmux.conf.local
+  ${ZSHRC_SOURCE}|${HOME}/.zshrc
+  ${OS_SPECIFIC_SYMLINKS}
 "
 
   echo "${symlink_pairs}" | grep -v "^#" | grep -v "^$" | while IFS="|" read -r src dst; do
@@ -462,12 +440,18 @@ main() {
 
   # Important groundwork
   detect_os
+
+  if [ "$OS" = "unknown" ]; then
+    log_warning "Skipping package installation for unknown OS"
+    setup_dotfiles
+    log_debug "exiting main($(join_args "$@"))"
+    return
+  fi
+
   verify_essentials
 
   # Unpack the boxes
   install_packages
-  # Emacs/Doom Emacs setup is no longer performed
-  # setup_doom_emacs
   setup_dotfiles
 
   # OS Specific calls
