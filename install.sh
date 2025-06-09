@@ -30,7 +30,7 @@ log_info() {
 
 log_debug() {
   if $DEBUG; then
-    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${BLUE}[DEBUG]${RESET} $1"
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${BLUE}[DEBUG]${RESET} $1" >&2
   fi
 }
 
