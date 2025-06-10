@@ -1,15 +1,59 @@
 # ZSH Configuration for macOS
 # ===========================
-# Last updated: 2025-05-05
+# Last updated: 2025-06-09
 #
 # Changes applied:
-# - Added '....' alias for navigating up three directory levels
-# - Ensured Emacs configuration in PATH
-# - Maintained comprehensive neofetch/fastfetch system info display
-# - Preserved Starship prompt configuration
+# - Added fzf optimizations
 # 
 # Note: This file is designed to be symlinked from ~/.zshrc
-# rather than copied, ensuring a single source of truth for configuration.
+
+# FZF Configuration for better performance (macOS and Linux)
+# Use fd for faster file finding 
+if command -v fd > /dev/null 2>&1; then
+    export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix --hidden --follow --exclude .git'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_ALT_C_COMMAND='fd --type d --strip-cwd-prefix --hidden --follow --exclude .git'
+elif command -v rg > /dev/null 2>&1; then
+    # Fallback to ripgrep if fd is not available
+    export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+else
+    # Last resort: optimized find command
+    export FZF_DEFAULT_COMMAND='find . -path "*/\.*" -prune -o -type f -print 2> /dev/null | cut -b3-'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+fi
+
+# FZF options for better performance and appearance
+export FZF_DEFAULT_OPTS='--height 60% --layout=reverse --border --preview "head -100 {}" --preview-window=right:50%:wrap'
+
+# Enable fzf key bindings and completions (cross-platform paths)
+# macOS (Homebrew)
+if [[ -f "/opt/homebrew/opt/fzf/shell/key-bindings.zsh" ]]; then
+    source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+elif [[ -f "/usr/local/opt/fzf/shell/key-bindings.zsh" ]]; then
+    source "/usr/local/opt/fzf/shell/key-bindings.zsh"
+# Linux (package manager installs)
+elif [[ -f "/usr/share/fzf/key-bindings.zsh" ]]; then
+    source "/usr/share/fzf/key-bindings.zsh"
+elif [[ -f "/usr/share/doc/fzf/examples/key-bindings.zsh" ]]; then
+    source "/usr/share/doc/fzf/examples/key-bindings.zsh"
+# User-local install
+elif [[ -f "$HOME/.fzf/shell/key-bindings.zsh" ]]; then
+    source "$HOME/.fzf/shell/key-bindings.zsh"
+fi
+
+# FZF completions (cross-platform paths)
+if [[ -f "/opt/homebrew/opt/fzf/shell/completion.zsh" ]]; then
+    source "/opt/homebrew/opt/fzf/shell/completion.zsh"
+elif [[ -f "/usr/local/opt/fzf/shell/completion.zsh" ]]; then
+    source "/usr/local/opt/fzf/shell/completion.zsh"
+elif [[ -f "/usr/share/fzf/completion.zsh" ]]; then
+    source "/usr/share/fzf/completion.zsh"
+elif [[ -f "/usr/share/doc/fzf/examples/completion.zsh" ]]; then
+    source "/usr/share/doc/fzf/examples/completion.zsh"
+elif [[ -f "$HOME/.fzf/shell/completion.zsh" ]]; then
+    source "$HOME/.fzf/shell/completion.zsh"
+fi
 
 # Source Prezto if it exists (primary configuration system)
 if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
@@ -51,7 +95,6 @@ typeset -U path  # Ensure unique paths
 
 # Common paths
 [[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path)
-# Emacs config no longer backed up
 [[ -d "$HOME/dotfiles/scripts" ]] && path=("$HOME/dotfiles/scripts" $path)
 
 # macOS paths
@@ -145,10 +188,3 @@ if command -v fastfetch &>/dev/null; then
     clear
     fastfetch --structure Break:Break:Break:Title:Break:OS:CPU:GPU:Disk:Memory:Uptime:Display:PowerAdapter:Battery:Wifi:LocalIp:PublicIp
 fi
-
-# Emacs path removed - no longer backed up
-
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/erica/.lmstudio/bin"
-# End of LM Studio CLI section
-
