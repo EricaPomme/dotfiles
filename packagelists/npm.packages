@@ -1,2 +1,13 @@
-markdownlint-cli
+# Markdown / Docs Tools
+markdownlint-cli               # Command-line tool to lint Markdown files for style and consistency
+markdown-link-check            # CLI tool to check for dead links in Markdown files
+prettier                       # Code formatter that supports many file types, including Markdown
 
+# Project / Dependency Maintenance
+npm-check-updates              # CLI tool to find and update outdated npm dependencies
+
+# Static File / Local Preview
+http-server                    # Simple zero-config static file server (great for testing docs or sites)
+
+# Scripting / Automation
+zx                             # Scripting tool from Google — write shell scripts in modern JavaScript

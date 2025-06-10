@@ -1,32 +1,36 @@
-eza
-fzf
-tmux
-zsh
-git
-pyenv
-neovim
-ripgrep
-coreutils
-fastfetch
-htop
-pandoc
-curl
-wget
-nmap
-# docker-cli has been removed as it should be installed via the Docker cask
-gnupg
-ssh-copy-id
-fd
-jq
-cmake
-make
-go
-lua
-node  # Includes npm
-python
-bat
-tldr
-tree
-ykman
-shfmt
-git-lfs
+# Developer Tools
+docker                         # Containerization platform (develop, ship, run apps)
+firefox                        # Open-source web browser (focus on privacy and performance)
+visual-studio-code             # Lightweight code editor with rich extension ecosystem
+warp                           # Terminal with AI-assisted features (fast, modern UX)
+xquartz                        # X11 server for macOS (required by some Unix apps)
+fd                             # Fast alternative to find command 
+
+# Security & Privacy
+1password                      # Secure password manager with cloud sync
+1password-cli                  # Command-line tool to interact with 1Password vaults
+signal                         # Encrypted messaging app (Signal protocol)
+yubico-yubikey-manager         # Manage and configure YubiKey hardware security keys
+
+# Media & Design
+calibre                        # E-book library management and conversion tool
+gimp                           # Open-source image editor (Photoshop alternative)
+gqrx                           # Software-defined radio (SDR) receiver application
+
+# Game Streaming / Virtualization
+moonlight                      # Game streaming client (NVIDIA GameStream)
+parsec                         # Low-latency remote desktop / game streaming tool
+utm                            # Virtualization tool for running OSes on Apple Silicon and Intel Macs
+
+# Productivity & Notes
+scroll-reverser                # Reverses scroll direction for mouse/trackpad independently
+
+# System Utilities
+appcleaner                     # Thoroughly uninstalls apps and their leftover files
+balenaetcher                   # Flashes OS images to USB drives and SD cards
+disk-inventory-x               # Visual disk usage analyzer (treemap style)
+hammerspoon                    # Powerful automation tool for macOS (Lua-based)
+middleclick                    # Enables middle click emulation on Mac trackpads
+
+# Communication & Social
+discord                        # Voice, video, and text chat for communities/gaming
