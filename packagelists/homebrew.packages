@@ -32,5 +32,8 @@ disk-inventory-x               # Visual disk usage analyzer (treemap style)
 hammerspoon                    # Powerful automation tool for macOS (Lua-based)
 middleclick                    # Enables middle click emulation on Mac trackpads
 
+# File Transfer & Cloud
+cyberduck                      # FTP/SFTP/WebDAV/cloud storage browser with GUI
+
 # Communication & Social
 discord                        # Voice, video, and text chat for communities/gaming
