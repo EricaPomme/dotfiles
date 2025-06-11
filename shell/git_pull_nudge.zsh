@@ -1,4 +1,9 @@
 # Check for upstream git ahead of us
+
+# Prevent double-loading
+[[ -n ${GIT_PULL_NUDGE_LOADED} ]] && return
+GIT_PULL_NUDGE_LOADED=1
+
 autoload -U add-zsh-hook
 GIT_PULL_NUDGE_CACHE_TIMEOUT=60
 typeset -gA GIT_PULL_NUDGE_LAST_CHECKED
