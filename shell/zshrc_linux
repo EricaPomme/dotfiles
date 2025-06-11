@@ -3,12 +3,44 @@
 # Last updated: 2025-06-07
 #
 # Changes applied:
-# - Restructured to follow macOS theme and organization
-# - Enhanced fallback configuration when Prezto is not available
-# - Improved editor configuration priority (nvim > code > vim > nano)
-# - Better modern command-line tool integration
-# - Added comprehensive directory navigation aliases
-# - Enhanced path management with dotfiles scripts
+# - fzf optimizations
+
+# FZF Configuration for better performance (Linux)
+# Use fd for faster file finding
+if command -v fd > /dev/null 2>&1; then
+    export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix --hidden --follow --exclude .git'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_ALT_C_COMMAND='fd --type d --strip-cwd-prefix --hidden --follow --exclude .git'
+elif command -v rg > /dev/null 2>&1; then
+    # Fallback to ripgrep if fd is not available
+    export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+else
+    # Last resort: optimized find command
+    export FZF_DEFAULT_COMMAND='find . -path "*/\.*" -prune -o -type f -print 2> /dev/null | cut -b3-'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+fi
+
+# FZF options for better performance and appearance
+export FZF_DEFAULT_OPTS='--height 60% --layout=reverse --border --preview "head -100 {}" --preview-window=right:50%:wrap'
+
+# Enable fzf key bindings and completions
+if [[ -f "/usr/share/fzf/key-bindings.zsh" ]]; then
+    source "/usr/share/fzf/key-bindings.zsh"
+elif [[ -f "/usr/share/doc/fzf/examples/key-bindings.zsh" ]]; then
+    source "/usr/share/doc/fzf/examples/key-bindings.zsh"
+elif [[ -f "$HOME/.fzf/shell/key-bindings.zsh" ]]; then
+    source "$HOME/.fzf/shell/key-bindings.zsh"
+fi
+
+# FZF completions
+if [[ -f "/usr/share/fzf/completion.zsh" ]]; then
+    source "/usr/share/fzf/completion.zsh"
+elif [[ -f "/usr/share/doc/fzf/examples/completion.zsh" ]]; then
+    source "/usr/share/doc/fzf/examples/completion.zsh"
+elif [[ -f "$HOME/.fzf/shell/completion.zsh" ]]; then
+    source "$HOME/.fzf/shell/completion.zsh"
+fi
 
 # Source Prezto if it exists (primary configuration system)
 if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
