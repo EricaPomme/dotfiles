@@ -5,14 +5,8 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# ZSH Configuration for macOS
-# ===========================
-# Last updated: 2025-06-09
-#
-# Changes applied:
-# - Added fzf optimizations
-# 
-# Note: This file is designed to be symlinked from ~/.zshrc
+# Source extras
+source "~/dotfiles/shell/git_pull_nudge.zsh"
 
 # FZF Configuration for better performance (macOS and Linux)
 # Use fd for faster file finding 
