@@ -3,12 +3,7 @@
 # Last updated: 2025-06-07
 #
 # Changes applied:
-# - Restructured to follow macOS theme and organization
-# - Enhanced fallback configuration when Prezto is not available
-# - Improved editor configuration priority (nvim > code > vim > nano)
-# - Better modern command-line tool integration
-# - Added comprehensive directory navigation aliases
-# - Enhanced path management with dotfiles scripts
+# - fzf optimizations
 
 # FZF Configuration for better performance (Linux)
 # Use fd for faster file finding
