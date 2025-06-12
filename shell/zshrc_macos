@@ -6,7 +6,8 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # Source extras
-source "~/dotfiles/shell/git_pull_nudge.zsh"
+source "${HOME}/dotfiles/shell/git_pull_nudge.zsh"
+[ -e "${HOME}/.iterm2_shell_integration.zsh" ] && source "${HOME}/.iterm2_shell_integration.zsh" || true
 
 # FZF Configuration for better performance (macOS and Linux)
 # Use fd for faster file finding 
@@ -177,16 +178,11 @@ upnote_add() {
   ~/dotfiles/scripts/upnote_add.py "$@" > /dev/null 2>&1
 }
 
-# Prompt is now handled by Prezto or fallback configuration
-
-  autoload -Uz promptinit
-  promptinit
-  prompt powerlevel10k
-
-# Check for fastfetch/neofetch before system information display
-if command -v fastfetch &>/dev/null; then
-    clear
-    fastfetch --structure Break:Break:Break:Title:Break:OS:CPU:GPU:Disk:Memory:Uptime:Display:PowerAdapter:Battery:Wifi:LocalIp:PublicIp
+# Set pretty prompt if zprezto is installed
+if [ -e "${ZDOTDIR:-$HOME}/.zprezto/" ]; then
+    autoload -Uz promptinit
+    promptinit
+    prompt powerlevel10k
 fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
