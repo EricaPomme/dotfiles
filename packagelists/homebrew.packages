@@ -24,7 +24,7 @@ utm                            # Virtualization tool for running OSes on Apple S
 
 # Productivity & Notes
 scroll-reverser                # Reverses scroll direction for mouse/trackpad independently
-textsniper                     # Extract text from images using OCR technology
+# textsniper                     # Extract text from images using OCR technology
 
 # System Utilities
 appcleaner                     # Thoroughly uninstalls apps and their leftover files
