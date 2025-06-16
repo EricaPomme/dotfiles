@@ -1,10 +1,11 @@
 # Developer Tools
 docker                         # Containerization platform (develop, ship, run apps)
 firefox                        # Open-source web browser (focus on privacy and performance)
+pipx                           # Install and run Python applications in isolated environments
 visual-studio-code             # Lightweight code editor with rich extension ecosystem
 warp                           # Terminal with AI-assisted features (fast, modern UX)
 xquartz                        # X11 server for macOS (required by some Unix apps)
-fd                             # Fast alternative to find command 
+fd                             # Fast alternative to find command
 
 # Security & Privacy
 1password                      # Secure password manager with cloud sync
