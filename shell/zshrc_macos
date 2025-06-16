@@ -162,6 +162,8 @@ alias tar="tar --exclude='*/.DS_Store'\
                --exclude='*/.Spotlight-V100'\
                --exclude='*/._*'"
 
+alias py='/opt/homebrew/bin/python3'
+
 # Network utilities
 ipv4() {
     curl -4fsSL https://ifconfig.me
