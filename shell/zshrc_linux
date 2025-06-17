@@ -1,5 +1,5 @@
 # Source extras
-source "~/dotfiles/shell/git_pull_nudge.zsh"
+source ~/dotfiles/shell/git_pull_nudge.zsh
 
 if command -v fd > /dev/null 2>&1; then
     export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix --hidden --follow --exclude .git'
