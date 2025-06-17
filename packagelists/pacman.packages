@@ -11,6 +11,7 @@ fastfetch
 ripgrep
 fd
 bat
+lolcat
 
 # Development tools
 git
@@ -23,3 +24,6 @@ make
 curl
 wget
 nmap
+
+# GUI tools
+pamac-aur
