@@ -24,6 +24,10 @@ make
 curl
 wget
 nmap
+networkmanager
+modemmanager
+usb_modeswitch
+mobile-broadband-provider-info
 
 # GUI tools
 pamac-aur
