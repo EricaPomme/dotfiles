@@ -15,3 +15,6 @@ ssh/config         # if you accidentally create a real config here
 # Editor-specific junk
 .vscode/
 *.log
+# Git credentials and local overrides
+.git-credentials
+git/gitconfig.local

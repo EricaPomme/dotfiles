@@ -1,0 +1,7 @@
+[user]
+    name = Erica Young
+    email = erica@pomme.cafe
+
+# Load additional settings like credentials from ~/.gitconfig.local if present
+[include]
+    path = ~/.gitconfig.local
