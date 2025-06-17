@@ -1,0 +1,38 @@
+# ~/dotfiles/shell/zprofile_linux
+# -----------------------------------------------------------------------------
+# 1) PATH configuration (login shells)
+# -----------------------------------------------------------------------------
+typeset -U path
+[[ -d "$HOME/.local/bin" ]]       && path=("$HOME/.local/bin"       $path)  # personal scripts/bins
+[[ -d "$HOME/dotfiles/scripts" ]] && path=("$HOME/dotfiles/scripts" $path)  # repo tools
+[[ -d "/usr/local/bin" ]]         && path=("/usr/local/bin"         $path)  # system-wide
+[[ -d "/opt/local/bin" ]]         && path=("/opt/local/bin"         $path)  # macports‐style
+export PATH
+
+# -----------------------------------------------------------------------------
+# 2) Language/version managers
+# -----------------------------------------------------------------------------
+if command -v pyenv &>/dev/null; then
+  export PYENV_ROOT="$HOME/.pyenv"                           # where pyenv lives
+  [[ -d $PYENV_ROOT/bin ]] && path=("$PYENV_ROOT/bin" $path) # shim lookup
+  eval "$(pyenv init -)"                                     # set up shims & hooks
+fi
+
+# -----------------------------------------------------------------------------
+# 3) Editor environment
+# -----------------------------------------------------------------------------
+if command -v nvim &>/dev/null; then
+  export EDITOR="nvim"; alias e="nvim"
+elif command -v code &>/dev/null; then
+  export EDITOR="code -w"; alias e="code -w"
+elif command -v vim &>/dev/null; then
+  export EDITOR="vim"; alias e="vim"
+else
+  export EDITOR="nano"; alias e="nano"
+fi
+
+if command -v code &>/dev/null; then
+  export VISUAL="code"
+else
+  export VISUAL="$EDITOR"
+fi

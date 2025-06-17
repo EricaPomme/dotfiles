@@ -25,39 +25,39 @@ MAGENTA='\033[0;35m'
 RESET='\033[0m'
 
 log_info() {
-  echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${CYAN}[INFO]${RESET} $1"
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${CYAN}[INFO]${RESET} $1"
 }
 
 log_debug() {
-  if $DEBUG; then
-    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${BLUE}[DEBUG]${RESET} $1" >&2
-  fi
+    if $DEBUG; then
+        echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${BLUE}[DEBUG]${RESET} $1" >&2
+    fi
 }
 
 log_success() {
-  echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${GREEN}[SUCCESS]${RESET} $1"
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${GREEN}[SUCCESS]${RESET} $1"
 }
 
 log_warning() {
-  echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${YELLOW}[WARNING]${RESET} $1"
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${YELLOW}[WARNING]${RESET} $1"
 }
 
 log_error() {
-  echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${RED}[ERROR]${RESET} $1" >&2
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${RED}[ERROR]${RESET} $1" >&2
 }
 
 log_critical() {
-  echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${MAGENTA}[CRITICAL]${RESET} $1" >&2
-  exit 1
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${MAGENTA}[CRITICAL]${RESET} $1" >&2
+    exit 1
 }
 
 join_args() {
-  joined=""
-  for arg in "$@"; do
-    joined="$joined$arg, "
-  done
-  # Remove trailing comma and space
-  echo "${joined%, }"
+    joined=""
+    for arg in "$@"; do
+        joined="$joined$arg, "
+    done
+    # Remove trailing comma and space
+    echo "${joined%, }"
 }
 
 # Check if a command is available in the system's PATH
@@ -72,11 +72,11 @@ join_args() {
 #   0 - If the command exists and is executable
 #   Does not return if command is not found (exits with error)
 check_command() {
-  log_debug "entering check_command($(join_args "$@"))"
-  if ! command -v "$1" &>/dev/null; then
-    log_critical "Required command '$1' not found. Please install it."
-  fi
-  log_debug "exiting check_command($(join_args "$@"))"
+    log_debug "entering check_command($(join_args "$@"))"
+    if ! command -v "$1" &>/dev/null; then
+        log_critical "Required command '$1' not found. Please install it."
+    fi
+    log_debug "exiting check_command($(join_args "$@"))"
 }
 
 # Detects the operating system of the current environment
@@ -94,17 +94,17 @@ check_command() {
 #   None - Sets the global variable OS to the detected operating system
 #           (or "unknown" if unrecognized)
 detect_os() {
-  log_debug "entering detect_os($(join_args "$@"))"
-  case "$(uname -s)" in
+    log_debug "entering detect_os($(join_args "$@"))"
+    case "$(uname -s)" in
     Linux*) OS="linux" ;;
     Darwin*) OS="macos" ;;
     *)
-      OS="unknown"
-      log_warning "Unrecognized OS: $(uname -s). Some features will be skipped."
-      ;;
-  esac
-  log_info "Detected OS: $OS"
-  log_debug "exiting detect_os($(join_args "$@"))"
+        OS="unknown"
+        log_warning "Unrecognized OS: $(uname -s). Some features will be skipped."
+        ;;
+    esac
+    log_info "Detected OS: $OS"
+    log_debug "exiting detect_os($(join_args "$@"))"
 }
 
 # Detects the Linux distribution of the current environment
@@ -122,15 +122,15 @@ detect_os() {
 #   None - Sets the global variable DISTRO_ID to the detected Linux distribution
 #   Exits with error if the distribution cannot be detected
 detect_linux_distro() {
-  log_debug "entering detect_linux_distro($(join_args "$@"))"
-  if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    DISTRO_ID="${ID,,}"
-  else
-    log_critical "Unable to detect Linux distribution"
-  fi
-  log_info "Detected Linux distribution: $DISTRO_ID"
-  log_debug "exiting detect_linux_distro($(join_args "$@"))"
+    log_debug "entering detect_linux_distro($(join_args "$@"))"
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        DISTRO_ID="${ID,,}"
+    else
+        log_critical "Unable to detect Linux distribution"
+    fi
+    log_info "Detected Linux distribution: $DISTRO_ID"
+    log_debug "exiting detect_linux_distro($(join_args "$@"))"
 }
 
 # Reads and processes a package list file
@@ -146,10 +146,9 @@ detect_linux_distro() {
 # Returns:
 #   Outputs a list of package names (one per line) to stdout
 read_packagelist() {
-
-  log_debug "entering read_packagelist($(join_args "$@"))"
-  grep -vE '^\s*#' "$1" | awk '{print $1}'
-  log_debug "exiting read_packagelist($(join_args "$@"))"
+    log_debug "entering read_packagelist($(join_args "$@"))"
+    grep -vE '^\s*#' "$1" | awk '{print $1}'
+    log_debug "exiting read_packagelist($(join_args "$@"))"
 }
 
 # Installs packages from predefined package lists based on the detected OS
@@ -167,91 +166,90 @@ read_packagelist() {
 #   0 - On successful execution (even if some package installations fail)
 #   Package installation failures are logged as warnings but don't cause the function to exit
 install_packages() {
-  log_debug "entering install_packages($(join_args "$@"))"
+    log_debug "entering install_packages($(join_args "$@"))"
 
-  if ! $BYPASS_OS_PACKAGES; then
-    case "$OS" in
-      macos)
-      log_debug "installing macOS packages"
-      if [ -f "packagelists/homebrew.packages" ]; then
-        check_command brew
-        log_info "Installing Homebrew packages..."
-        read_packagelist "packagelists/homebrew.packages" | xargs brew install || log_warning "Some brew installs may have failed"
-      fi
-      if [ -f "packagelists/homebrew.casks" ]; then
-        check_command brew
-        log_info "Installing Homebrew casks..."
-        read_packagelist "packagelists/homebrew.casks" | xargs brew install --cask || log_warning "Some cask installs may have failed"
-      fi
-      ;;
-    linux)
-      log_debug "installing Linux packages"
-      detect_linux_distro
-      case "$DISTRO_ID" in
-        ubuntu | debian)
-          if [ -f "packagelists/deb.packages" ]; then
-            check_command apt
-            log_info "Installing APT packages..."
-            sudo apt-get update
-            read_packagelist "packagelists/deb.packages" | xargs sudo apt-get install -y || log_warning "Some apt installs may have failed"
-          fi
-          ;;
-        fedora)
-          if [ -f "packagelists/fedora.packages" ]; then
-            check_command dnf
-            log_info "Installing DNF packages..."
-            read_packagelist "packagelists/fedora.packages" | xargs sudo dnf install -y || log_warning "Some dnf installs may have failed"
-          fi
-          ;;
-        arch | endeavouros | cachyos | garuda)
-          if [ -f "packagelists/pacman.packages" ]; then
-            check_command pacman
-            log_info "Installing Pacman packages..."
-            read_packagelist "packagelists/pacman.packages" | xargs -r sudo pacman -S --noconfirm --needed || log_warning "Some pacman installs may have failed"
-          fi
-          ;;
-        nixos)
-          if [ -f "packagelists/nix.packages" ]; then
-            check_command nix-env
-            log_info "Installing Nix packages..."
-            read_packagelist "packagelists/nix.packages" | xargs nix-env -iA nixos || log_warning "Some nix installs may have failed"
-          fi
-          ;;
-        *)
-          log_warning "Unsupported Linux distribution: $DISTRO_ID"
-          ;;
-      esac
+    if ! $BYPASS_OS_PACKAGES; then
+        case "$OS" in
+        macos)
+            log_debug "installing macOS packages"
+            if [ -f "packagelists/homebrew.packages" ]; then
+                check_command brew
+                log_info "Installing Homebrew packages..."
+                read_packagelist "packagelists/homebrew.packages" | xargs brew install || log_warning "Some brew installs may have failed"
+            fi
+            if [ -f "packagelists/homebrew.casks" ]; then
+                check_command brew
+                log_info "Installing Homebrew casks..."
+                read_packagelist "packagelists/homebrew.casks" | xargs brew install --cask || log_warning "Some cask installs may have failed"
+            fi
+            ;;
+        linux)
+            log_debug "installing Linux packages"
+            detect_linux_distro
+            case "$DISTRO_ID" in
+            ubuntu | debian)
+                if [ -f "packagelists/deb.packages" ]; then
+                    check_command apt
+                    log_info "Installing APT packages..."
+                    sudo apt-get update
+                    read_packagelist "packagelists/deb.packages" | xargs sudo apt-get install -y || log_warning "Some apt installs may have failed"
+                fi
+                ;;
+            fedora)
+                if [ -f "packagelists/fedora.packages" ]; then
+                    check_command dnf
+                    log_info "Installing DNF packages..."
+                    read_packagelist "packagelists/fedora.packages" | xargs sudo dnf install -y || log_warning "Some dnf installs may have failed"
+                fi
+                ;;
+            arch | endeavouros | cachyos | garuda)
+                if [ -f "packagelists/pacman.packages" ]; then
+                    check_command pacman
+                    log_info "Installing Pacman packages..."
+                    read_packagelist "packagelists/pacman.packages" | xargs -r sudo pacman -S --noconfirm --needed || log_warning "Some pacman installs may have failed"
+                fi
+                ;;
+            nixos)
+                if [ -f "packagelists/nix.packages" ]; then
+                    check_command nix-env
+                    log_info "Installing Nix packages..."
+                    read_packagelist "packagelists/nix.packages" | xargs nix-env -iA nixos || log_warning "Some nix installs may have failed"
+                fi
+                ;;
+            *)
+                log_warning "Unsupported Linux distribution: $DISTRO_ID"
+                ;;
+            esac
 
-      if command -v flatpak &>/dev/null && [ -f "packagelists/flatpak" ]; then
-        log_info "Installing Flatpak packages..."
-        read_packagelist "packagelists/flatpak" | xargs -I{} flatpak install -y --noninteractive flathub {} || log_warning "Some flatpak installs may have failed"
-      fi
-      ;;
-    esac
-  else
-    log_info "BYPASS_OS_PACKAGES is true, skipping OS package installation"
-  fi
+            if command -v flatpak &>/dev/null && [ -f "packagelists/flatpak" ]; then
+                log_info "Installing Flatpak packages..."
+                read_packagelist "packagelists/flatpak" | xargs -I{} flatpak install -y --noninteractive flathub {} || log_warning "Some flatpak installs may have failed"
+            fi
+            ;;
+        esac
+    else
+        log_info "BYPASS_OS_PACKAGES is true, skipping OS package installation"
+    fi
 
-  log_debug "installing platform-agnostic packages"
-  if ! $BYPASS_CARGO && [ -f "packagelists/cargo" ]; then
-    check_command cargo
-    log_info "Installing Cargo packages..."
-    read_packagelist "packagelists/cargo" | xargs cargo install || log_warning "Some cargo installs may have failed"
-  elif $BYPASS_CARGO; then
-    log_info "BYPASS_CARGO is true, skipping Cargo packages"
-  fi
+    log_debug "installing platform-agnostic packages"
+    if ! $BYPASS_CARGO && [ -f "packagelists/cargo" ]; then
+        check_command cargo
+        log_info "Installing Cargo packages..."
+        read_packagelist "packagelists/cargo" | xargs cargo install || log_warning "Some cargo installs may have failed"
+    elif $BYPASS_CARGO; then
+        log_info "BYPASS_CARGO is true, skipping Cargo packages"
+    fi
 
-  if ! $BYPASS_NPM && [ -f "packagelists/npm" ]; then
-    check_command npm
-    log_info "Installing NPM global packages..."
-    read_packagelist "packagelists/npm" | xargs npm install -g || log_warning "Some npm installs may have failed"
-  elif $BYPASS_NPM; then
-    log_info "BYPASS_NPM is true, skipping NPM packages"
-  fi
+    if ! $BYPASS_NPM && [ -f "packagelists/npm" ]; then
+        check_command npm
+        log_info "Installing NPM global packages..."
+        read_packagelist "packagelists/npm" | xargs npm install -g || log_warning "Some npm installs may have failed"
+    elif $BYPASS_NPM; then
+        log_info "BYPASS_NPM is true, skipping NPM packages"
+    fi
 
-  log_debug "exiting install_packages($(join_args "$@"))"
+    log_debug "exiting install_packages($(join_args "$@"))"
 }
-
 
 # Sets up dotfiles by creating symbolic links and configuring SSH
 #
@@ -271,90 +269,95 @@ install_packages() {
 #   0 - On successful execution
 #   All operations are logged with appropriate info messages
 setup_dotfiles() {
-  log_debug "entering setup_dotfiles($(join_args "$@"))"
+    log_debug "entering setup_dotfiles($(join_args "$@"))"
 
-  # Ensure HOME and PWD are defined
-  if [ -z "${HOME:-}" ]; then
-    log_critical "HOME environment variable is not defined"
-  fi
+    # Ensure HOME and PWD are defined
+    if [ -z "${HOME:-}" ]; then
+        log_critical "HOME environment variable is not defined"
+    fi
 
-  if [ -z "${PWD:-}" ]; then
-    PWD="$(pwd)"
-    log_warning "PWD was not defined, using current directory: $PWD"
-  fi
+    if [ -z "${PWD:-}" ]; then
+        PWD="$(pwd)"
+        log_warning "PWD was not defined, using current directory: $PWD"
+    fi
 
-  # Use a fully POSIX-compliant approach with newline-separated pairs
-  # OS-specific zshrc selection and symlink configuration
-  case "$OS" in
+    # Use a fully POSIX-compliant approach with newline-separated pairs
+    # OS-specific zshrc selection and symlink configuration
+    case "$OS" in
     macos)
-      ZSHRC_SOURCE="shell/zshrc_macos"
-      OS_SPECIFIC_SYMLINKS="hammerspoon|${HOME}/.hammerspoon"
-      ;;
+        ZSHRC_SOURCE="shell/zshrc_macos"
+        ZPROFILE_SOURCE="shell/zprofile_macos"
+        OS_SPECIFIC_SYMLINKS="hammerspoon|${HOME}/.hammerspoon"
+        ;;
     linux)
-      ZSHRC_SOURCE="shell/zshrc_linux"
-      OS_SPECIFIC_SYMLINKS=""
-      ;;
+        ZSHRC_SOURCE="shell/zshrc_linux"
+        ZPROFILE_SOURCE="shell/zprofile_linux"
+        OS_SPECIFIC_SYMLINKS=""
+        ;;
     *)
-      log_warning "Unknown OS: $OS, defaulting to Linux zshrc"
-      ZSHRC_SOURCE="shell/zshrc_linux"
-      OS_SPECIFIC_SYMLINKS=""
-      ;;
-  esac
+        log_warning "Unknown OS: $OS, defaulting to Linux zshrc"
+        ZSHRC_SOURCE="shell/zshrc_linux"
+        ZPROFILE_SOURCE="shell/zprofile_linux"
+        OS_SPECIFIC_SYMLINKS=""
+        ;;
+    esac
 
-  symlink_pairs="$(cat <<EOF
+    symlink_pairs="$(
+        cat <<EOF
 # Format: source|destination
+git/gitconfig|${HOME}/.gitconfig
 nvim/config|${HOME}/.config/nvim
 tmux/.tmux.conf.local|${HOME}/.tmux.conf.local
-${ZSHRC_SOURCE}|${HOME}/.zshrc
-git/gitconfig|${HOME}/.gitconfig
 ${OS_SPECIFIC_SYMLINKS}
+${ZPROFILE_SOURCE}|${HOME}/.zprofile
+${ZSHRC_SOURCE}|${HOME}/.zshrc
 EOF
-)"
+    )"
 
-  echo "${symlink_pairs}" | grep -v "^#" | grep -v "^$" | while IFS="|" read -r src dst; do
-    # Skip empty lines
-    [ -z "$src" ] && continue
-    
-    # Ensure source file exists
-    if [ ! -e "${PWD}/${src}" ]; then
-      log_warning "Source file '${PWD}/${src}' does not exist, skipping symlink creation"
-      continue
-    fi
-    
-    # Create directory if it doesn't exist
-    mkdir -p "$(dirname "$dst")"
-    
-    # Check if symlink already exists and points to the correct location
-    if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$PWD/$src" ]; then
-      log_info "Symlink for '$dst' already correctly set"
+    echo "${symlink_pairs}" | grep -v "^#" | grep -v "^$" | while IFS="|" read -r src dst; do
+        # Skip empty lines
+        [ -z "$src" ] && continue
+
+        # Ensure source file exists
+        if [ ! -e "${PWD}/${src}" ]; then
+            log_warning "Source file '${PWD}/${src}' does not exist, skipping symlink creation"
+            continue
+        fi
+
+        # Create directory if it doesn't exist
+        mkdir -p "$(dirname "$dst")"
+
+        # Check if symlink already exists and points to the correct location
+        if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$PWD/$src" ]; then
+            log_info "Symlink for '$dst' already correctly set"
+        else
+            # Backup existing file if it's not a symlink
+            if [ -e "$dst" ] && [ ! -L "$dst" ]; then
+                local backup_file="${dst}.backup.$(date +%Y%m%d%H%M%S)"
+                log_info "Backing up existing file '$dst' to '$backup_file'"
+                mv "$dst" "$backup_file"
+            fi
+
+            # Create the symlink
+            if ln -sf "$PWD/$src" "$dst"; then
+                log_info "Updated symlink: $dst → $PWD/$src"
+            else
+                log_error "Failed to create symlink from '$PWD/$src' to '$dst'"
+            fi
+        fi
+    done
+
+    # SSH config
+    mkdir -p "$HOME/.ssh"
+    if [ ! -f "$HOME/.ssh/config" ]; then
+        cp ssh/config_template "$HOME/.ssh/config"
+        chmod 600 "$HOME/.ssh/config"
+        log_info "SSH config placeholder copied"
     else
-      # Backup existing file if it's not a symlink
-      if [ -e "$dst" ] && [ ! -L "$dst" ]; then
-        local backup_file="${dst}.backup.$(date +%Y%m%d%H%M%S)"
-        log_info "Backing up existing file '$dst' to '$backup_file'"
-        mv "$dst" "$backup_file"
-      fi
-      
-      # Create the symlink
-      if ln -sf "$PWD/$src" "$dst"; then
-        log_info "Updated symlink: $dst → $PWD/$src"
-      else
-        log_error "Failed to create symlink from '$PWD/$src' to '$dst'"
-      fi
+        log_info "SSH config already exists at '$HOME/.ssh/config', not overwriting"
     fi
-  done
 
-  # SSH config
-  mkdir -p "$HOME/.ssh"
-  if [ ! -f "$HOME/.ssh/config" ]; then
-    cp ssh/config_template "$HOME/.ssh/config"
-    chmod 600 "$HOME/.ssh/config"
-    log_info "SSH config placeholder copied"
-  else
-    log_info "SSH config already exists at '$HOME/.ssh/config', not overwriting"
-  fi
-
-  log_debug "exiting setup_dotfiles($(join_args "$@"))"
+    log_debug "exiting setup_dotfiles($(join_args "$@"))"
 }
 
 # Verifies and sets up essential tools for the environment
@@ -371,24 +374,24 @@ EOF
 #   0 - On successful execution
 #   Failures in changing the default shell are logged as warnings but don't cause the function to exit
 verify_essentials() {
-  log_debug "entering verify_essentials($(join_args "$@"))"
-  check_command git
-  check_command zsh
-  check_command curl
-  check_command cargo
-  [ "$OS" = "macos" ] && check_command brew
-  [ "$OS" = "linux" ] && check_command flatpak
+    log_debug "entering verify_essentials($(join_args "$@"))"
+    check_command git
+    check_command zsh
+    check_command curl
+    check_command cargo
+    [ "$OS" = "macos" ] && check_command brew
+    [ "$OS" = "linux" ] && check_command flatpak
 
-  ZSH_PATH=$(command -v zsh)
-  if [ "$SHELL" != "$ZSH_PATH" ]; then
-    if ! grep -q "$ZSH_PATH" /etc/shells; then
-      log_info "Adding '$ZSH_PATH' to /etc/shells"
-      echo "$ZSH_PATH" | sudo tee -a /etc/shells
+    ZSH_PATH=$(command -v zsh)
+    if [ "$SHELL" != "$ZSH_PATH" ]; then
+        if ! grep -q "$ZSH_PATH" /etc/shells; then
+            log_info "Adding '$ZSH_PATH' to /etc/shells"
+            echo "$ZSH_PATH" | sudo tee -a /etc/shells
+        fi
+        log_info "Changing default shell to zsh for user '$USER'"
+        chsh -s "$ZSH_PATH" || log_warning "Failed to change default shell"
     fi
-    log_info "Changing default shell to zsh for user '$USER'"
-    chsh -s "$ZSH_PATH" || log_warning "Failed to change default shell"
-  fi
-  log_debug "exiting verify_essentials($(join_args "$@"))"
+    log_debug "exiting verify_essentials($(join_args "$@"))"
 }
 
 # Clones git-based tools like Prezto and oh-my-tmux
@@ -397,41 +400,41 @@ verify_essentials() {
 # user's home directory. If not, it clones the repository and performs any
 # required setup. Progress is reported using the standard logging helpers.
 install_git_repos() {
-  log_debug "entering install_git_repos($(join_args "$@"))"
+    log_debug "entering install_git_repos($(join_args "$@"))"
 
-  if [ ! -d "$HOME/.zprezto" ]; then
-    log_info "Cloning Prezto..."
-    git clone --recursive https://github.com/sorin-ionescu/prezto.git "$HOME/.zprezto" \
-      || log_warning "Failed to clone Prezto"
-    log_info "Linking Prezto runcoms"
-    for rcfile in "$HOME"/.zprezto/runcoms/*; do
-      [ "$(basename "$rcfile")" = "README.md" ] && continue
-      target="$HOME/.${rcfile##*/}"
-      if [ -e "$target" ]; then
-        log_debug "$target already exists"
-      else
-        ln -s "$rcfile" "$target"
-      fi
-    done
-  else
-    log_info "Prezto already installed"
-  fi
-
-  if [ ! -d "$HOME/.tmux" ]; then
-    log_info "Cloning oh-my-tmux..."
-    git clone https://github.com/gpakosz/.tmux.git "$HOME/.tmux" \
-      || log_warning "Failed to clone oh-my-tmux"
-    ln -sf "$HOME/.tmux/.tmux.conf" "$HOME/.tmux.conf"
-    if [ -e "$HOME/.tmux.conf.local" ]; then
-      log_debug "$HOME/.tmux.conf.local already exists"
+    if [ ! -d "$HOME/.zprezto" ]; then
+        log_info "Cloning Prezto..."
+        git clone --recursive https://github.com/sorin-ionescu/prezto.git "$HOME/.zprezto" ||
+            log_warning "Failed to clone Prezto"
+        log_info "Linking Prezto runcoms"
+        for rcfile in "$HOME"/.zprezto/runcoms/*; do
+            [ "$(basename "$rcfile")" = "README.md" ] && continue
+            target="$HOME/.${rcfile##*/}"
+            if [ -e "$target" ]; then
+                log_debug "$target already exists"
+            else
+                ln -s "$rcfile" "$target"
+            fi
+        done
     else
-      ln -s "$PWD/tmux/.tmux.conf.local" "$HOME/.tmux.conf.local"
+        log_info "Prezto already installed"
     fi
-  else
-    log_info "oh-my-tmux already installed"
-  fi
 
-  log_debug "exiting install_git_repos($(join_args "$@"))"
+    if [ ! -d "$HOME/.tmux" ]; then
+        log_info "Cloning oh-my-tmux..."
+        git clone https://github.com/gpakosz/.tmux.git "$HOME/.tmux" ||
+            log_warning "Failed to clone oh-my-tmux"
+        ln -sf "$HOME/.tmux/.tmux.conf" "$HOME/.tmux.conf"
+        if [ -e "$HOME/.tmux.conf.local" ]; then
+            log_debug "$HOME/.tmux.conf.local already exists"
+        else
+            ln -s "$PWD/tmux/.tmux.conf.local" "$HOME/.tmux.conf.local"
+        fi
+    else
+        log_info "oh-my-tmux already installed"
+    fi
+
+    log_debug "exiting install_git_repos($(join_args "$@"))"
 }
 
 # Configures macOS system defaults for improved usability
@@ -448,46 +451,46 @@ install_git_repos() {
 #   All operations are logged with appropriate debug and info messages
 #   UI component restarts that fail are logged as warnings but don't cause the function to exit
 set_macos_defaults() {
-  log_debug "entering set_macos_defaults($(join_args "$@"))"
-  log_info "Applying macOS system defaults"
+    log_debug "entering set_macos_defaults($(join_args "$@"))"
+    log_info "Applying macOS system defaults"
 
-  ### Finder Preferences ###
-  log_debug "Showing hidden files in Finder"
-  defaults write com.apple.finder AppleShowAllFiles -bool true
+    ### Finder Preferences ###
+    log_debug "Showing hidden files in Finder"
+    defaults write com.apple.finder AppleShowAllFiles -bool true
 
-  log_debug "Showing status bar in Finder"
-  defaults write com.apple.finder ShowStatusBar -bool true
+    log_debug "Showing status bar in Finder"
+    defaults write com.apple.finder ShowStatusBar -bool true
 
-  log_debug "Keeping folders on top when sorting by name"
-  defaults write com.apple.finder _FXSortFoldersFirst -bool true
-  defaults write NSGlobalDomain AppleShowAllFiles -bool true
+    log_debug "Keeping folders on top when sorting by name"
+    defaults write com.apple.finder _FXSortFoldersFirst -bool true
+    defaults write NSGlobalDomain AppleShowAllFiles -bool true
 
-  log_debug "Searching current folder by default"
-  defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
+    log_debug "Searching current folder by default"
+    defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
 
-  log_debug "Disabling extension change warning"
-  defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
+    log_debug "Disabling extension change warning"
+    defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
 
-  ### Dock / Animation ###
-  log_debug "Speeding up Mission Control animations"
-  defaults write com.apple.dock expose-animation-duration -float 0.1
+    ### Dock / Animation ###
+    log_debug "Speeding up Mission Control animations"
+    defaults write com.apple.dock expose-animation-duration -float 0.1
 
-  ### Safari ###
-  log_debug "Attempting to set Safari preferences"
-  if defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool true 2>/dev/null; then
-    log_info "Successfully set Safari preferences"
-  else
-    log_warning "Failed to set Safari preferences - may require full disk access"
-  fi
+    ### Safari ###
+    log_debug "Attempting to set Safari preferences"
+    if defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool true 2>/dev/null; then
+        log_info "Successfully set Safari preferences"
+    else
+        log_warning "Failed to set Safari preferences - may require full disk access"
+    fi
 
-  ### Refresh UI ###
-  log_debug "Restarting Finder and Dock to apply changes"
-  killall Finder >/dev/null 2>&1 || log_warning "Finder was not running"
-  killall Dock >/dev/null 2>&1 || log_warning "Dock was not running"
-  
-  # Always return success, even if some settings couldn't be applied
-  log_debug "exiting set_macos_defaults($(join_args "$@"))"
-  return 0
+    ### Refresh UI ###
+    log_debug "Restarting Finder and Dock to apply changes"
+    killall Finder >/dev/null 2>&1 || log_warning "Finder was not running"
+    killall Dock >/dev/null 2>&1 || log_warning "Dock was not running"
+
+    # Always return success, even if some settings couldn't be applied
+    log_debug "exiting set_macos_defaults($(join_args "$@"))"
+    return 0
 
 }
 
@@ -502,53 +505,53 @@ set_macos_defaults() {
 # Returns:
 #   0 - On successful execution
 main() {
-  log_debug "entering main($(join_args "$@"))"
+    log_debug "entering main($(join_args "$@"))"
 
-  # Important groundwork
-  detect_os
+    # Important groundwork
+    detect_os
 
-  if [ "$OS" = "unknown" ]; then
-    log_warning "Skipping package installation for unknown OS"
-    setup_dotfiles
-    log_debug "exiting main($(join_args "$@"))"
-    return
-  fi
-
-  if ! $BYPASS_VERIFY_ESSENTIALS; then
-    verify_essentials
-  else
-    log_info "BYPASS_VERIFY_ESSENTIALS is true, skipping verify_essentials"
-  fi
-
-  if ! $BYPASS_GIT_REPOS; then
-    install_git_repos
-  else
-    log_info "BYPASS_GIT_REPOS is true, skipping install_git_repos"
-  fi
-
-  if $BYPASS_OS_PACKAGES && $BYPASS_CARGO && $BYPASS_NPM; then
-    log_info "All package bypass flags are true, skipping install_packages"
-  else
-    # Unpack the boxes
-    install_packages
-  fi
-
-  if ! $BYPASS_SETUP_DOTFILES; then
-    setup_dotfiles
-  else
-    log_info "BYPASS_SETUP_DOTFILES is true, skipping setup_dotfiles"
-  fi
-
-  # OS Specific calls
-  if [ "$OS" = "macos" ]; then
-    if ! $BYPASS_MACOS_DEFAULTS; then
-      set_macos_defaults
-    else
-      log_info "BYPASS_MACOS_DEFAULTS is true, skipping set_macos_defaults"
+    if [ "$OS" = "unknown" ]; then
+        log_warning "Skipping package installation for unknown OS"
+        setup_dotfiles
+        log_debug "exiting main($(join_args "$@"))"
+        return
     fi
-  fi
 
-  log_debug "exiting main($(join_args "$@"))"
+    if ! $BYPASS_VERIFY_ESSENTIALS; then
+        verify_essentials
+    else
+        log_info "BYPASS_VERIFY_ESSENTIALS is true, skipping verify_essentials"
+    fi
+
+    if ! $BYPASS_GIT_REPOS; then
+        install_git_repos
+    else
+        log_info "BYPASS_GIT_REPOS is true, skipping install_git_repos"
+    fi
+
+    if $BYPASS_OS_PACKAGES && $BYPASS_CARGO && $BYPASS_NPM; then
+        log_info "All package bypass flags are true, skipping install_packages"
+    else
+        # Unpack the boxes
+        install_packages
+    fi
+
+    if ! $BYPASS_SETUP_DOTFILES; then
+        setup_dotfiles
+    else
+        log_info "BYPASS_SETUP_DOTFILES is true, skipping setup_dotfiles"
+    fi
+
+    # OS Specific calls
+    if [ "$OS" = "macos" ]; then
+        if ! $BYPASS_MACOS_DEFAULTS; then
+            set_macos_defaults
+        else
+            log_info "BYPASS_MACOS_DEFAULTS is true, skipping set_macos_defaults"
+        fi
+    fi
+
+    log_debug "exiting main($(join_args "$@"))"
 }
 
 main "$@"

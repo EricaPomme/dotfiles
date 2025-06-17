@@ -1,0 +1,46 @@
+# ~/dotfiles/shell/zprofile_macos
+# -----------------------------------------------------------------------------
+# 1) Environment variables & PATH (login shells)
+# -----------------------------------------------------------------------------
+typeset -U path
+
+# Local bin and scripts first
+[[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path)
+[[ -d "$HOME/dotfiles/scripts" ]] && path=("$HOME/dotfiles/scripts" $path)
+
+# Homebrew (macOS) GNU coreutils
+[[ -d "/opt/homebrew/bin" ]] && path=("/opt/homebrew/bin" $path)
+[[ -d "/opt/homebrew/opt/coreutils/libexec/gnubin" ]] && path=("/opt/homebrew/opt/coreutils/libexec/gnubin" $path)
+
+export PATH
+
+# -----------------------------------------------------------------------------
+# 2) Environment/package managers
+# -----------------------------------------------------------------------------
+if command -v brew >/dev/null 2>&1; then
+    eval "$(brew shellenv)"
+elif [[ -x /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+if command -v pyenv >/dev/null 2>&1; then
+    export PYENV_ROOT="$HOME/.pyenv"
+    [[ -d $PYENV_ROOT/bin ]] && path=("$PYENV_ROOT/bin" $path)
+    eval "$(pyenv init -)"
+fi
+
+# -----------------------------------------------------------------------------
+# 3) Editor settings (for scripts & programs)
+# -----------------------------------------------------------------------------
+if command -v nvim >/dev/null 2>&1; then
+    export EDITOR="nvim"
+    alias e="nvim"
+else
+    export EDITOR="nano"
+fi
+
+if command -v code >/dev/null 2>&1; then
+    export VISUAL="code"
+else
+    export VISUAL="$EDITOR"
+fi
