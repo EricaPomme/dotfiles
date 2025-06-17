@@ -38,3 +38,10 @@ Available flags include `BYPASS_VERIFY_ESSENTIALS`, `BYPASS_GIT_REPOS`,
 `BYPASS_MACOS_DEFAULTS` and `BYPASS_OS_UPDATES`. Setting `DEBUG=true` will
 enable verbose logging.
 
+### Git configuration
+
+A global `.gitconfig` lives in `git/gitconfig`. It stores only non-sensitive
+defaults such as your name and email. If you need machine-specific settings or
+credentials, create `~/.gitconfig.local`; it will be loaded automatically but is
+ignored by version control.
+

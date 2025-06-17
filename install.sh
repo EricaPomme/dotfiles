@@ -306,6 +306,7 @@ setup_dotfiles() {
 nvim/config|${HOME}/.config/nvim
 tmux/.tmux.conf.local|${HOME}/.tmux.conf.local
 ${ZSHRC_SOURCE}|${HOME}/.zshrc
+git/gitconfig|${HOME}/.gitconfig
 ${OS_SPECIFIC_SYMLINKS}
 EOF
 )"
