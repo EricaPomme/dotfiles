@@ -176,33 +176,91 @@ end)
 
 -------------------------------------------------------------------------------
 -- URL Cleaner
+-------------------------------------------------------------------------------
+-- URL Cleaner (Refactored with Handler Table)
+local urlHandlers = {
+
+    -- Socials
+    {
+        name = "Bluesky",
+        match = function(url) return url:match("bsky%.app") end,
+        transform = function(url)
+            return url:gsub("^https?://[www%.]*bsky%.app", "https://fxbsky.app")
+        end
+    },
+    {
+        name = "Twitter/X",
+        match = function(url)
+            return url:match("^https?://[www%.]*x%.com") or url:match("^https?://[www%.]*twitter%.com")
+        end,
+        transform = function(url)
+            return url:gsub("^https?://[www%.]*[xtwitter]+%.com/(.*)$", "https://fxtwitter.com/%1")
+        end
+    },
+    {
+        name = "YouTube",
+        match = function(url) return url:match("youtube%.com/watch%?v=([^&]+)") end,
+        transform = function(url)
+            local videoId = url:match("v=([^&]+)")
+            return videoId and ("https://youtu.be/" .. videoId) or url
+        end
+    },
+
+    -- Shopping
+    {
+        name = "Amazon",
+        match = function(url) return url:match("^https?://[www%.]*amazon%.([%w%.]+)") end,
+        transform = function(url)
+            local pid = url:match("/[dgp]+/product/([A-Z0-9]+)")
+            local domain = url:match("^https?://[www%.]*amazon%.([%w%.]+)") or "com"
+            return pid and string.format("https://amazon.%s/dp/%s", domain, pid) or url
+        end
+    },
+
+    -- Filthy degeneracy
+    {
+        name = "e621",
+        match = function(url) return url:match("e621%.net") end,
+        transform = function(url) return url:gsub("%?.*$", "") end
+    },
+    {
+        name = "FurAffinity",
+        match = function(url) return url:match("furaffinity%.net") end,
+        transform = function(url)
+            return url:gsub("^https?://[www%.]*furaffinity%.net", "https://fxfuraffinity.net")
+        end
+    },
+}
+
 f13Mode:bind({}, 'v', function()
     local clipboard = hs.pasteboard.getContents()
     local original = clipboard
     local cleanUrl, modified
 
-    if clipboard:match("e621%.net") then
-        cleanUrl = clipboard:gsub("%?.*$", "")
-    elseif clipboard:match("^https?://[www%.]*[x|twitter]%.com") then
-        cleanUrl = clipboard:gsub("^https?://[www%.]*[x|twitter]%.com/(.*)$", "https://fxtwitter.com/%1")
-    elseif clipboard:match("^https?://[www%.]*youtube%.com/watch%?v=([^&]+)") then
-        cleanUrl = "https://youtu.be/" .. clipboard:match("v=([^&]+)")
-    elseif clipboard:match("^https?://[www%.]*amazon%.([%w%.]+)") then
-        local pid = clipboard:match("/[dgp]+/product/([A-Z0-9]+)")
-        if pid then
-            local domain = clipboard:match("^https?://[www%.]*amazon%.([%w%.]+)") or "com"
-            cleanUrl = string.format("https://amazon.%s/dp/%s", domain, pid)
-        end
-    elseif clipboard:match("furaffinity%.net") then
-        cleanUrl = clipboard:gsub("^https?://[www%.]*furaffinity%.net", "https://fxfuraffinity.net")
+    -- Validate clipboard is a URL
+    if not clipboard or not clipboard:match("^https?://") then
+        hs.alert.show("Clipboard doesn't contain a valid URL")
+        f13Mode:exit()
+        return
     end
 
-    cleanUrl = cleanUrl or clipboard:gsub("/ref=[^/%?]+", ""):gsub("%?.*$", "")
+    -- Apply the first matching handler
+    for _, handler in ipairs(urlHandlers) do
+        if handler.match(clipboard) then
+            cleanUrl = handler.transform(clipboard)
+            break
+        end
+    end
+
+    -- Fallback: strip query params and trailing slashes
+    cleanUrl = cleanUrl or clipboard:gsub("%?.*$", ""):gsub("/+$", "")
+
     if cleanUrl ~= original then
         hs.pasteboard.setContents(cleanUrl)
         modified = true
     end
 
+    -- Paste result if modified
     if modified then
         hs.timer.doAfter(0.1, function()
             local app = hs.application.frontmostApplication()
