@@ -77,6 +77,11 @@ else
     alias l='ls -la'
 fi
 
+# pdu (parallel disk usage) - better du replacement
+if command -v pdu &>/dev/null; then
+    alias du='pdu --top-down --progress --silent-errors'
+fi
+
 # -----------------------------------------------------------------------------
 # 5) Handy functions
 # -----------------------------------------------------------------------------

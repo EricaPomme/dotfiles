@@ -83,6 +83,11 @@ upnote_add() { ~/dotfiles/scripts/upnote_add.py "$@" &>/dev/null; }
 # gdu (Go Disk Usage) - avoid conflict with GNU coreutils du
 alias gdu='gdu-go'
 
+# pdu (parallel disk usage) - better du replacement
+if command -v pdu &>/dev/null; then
+    alias du='pdu --top-down --progress --silent-errors'
+fi
+
 # -----------------------------------------------------------------------------
 # 6) Prompt niceties & completions
 # -----------------------------------------------------------------------------
