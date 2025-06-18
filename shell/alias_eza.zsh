@@ -13,4 +13,4 @@ typeset -a ARGS=(
     --time-style=long-iso     # use long ISO time format
 )
 
-alias l="eza ${ARGS[@]}"
+alias l="eza ${(j: :)ARGS}"
