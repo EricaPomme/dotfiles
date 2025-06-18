@@ -43,10 +43,10 @@ done
 # 4) Aliases & enhancers
 # -----------------------------------------------------------------------------
 # “.” up shortcuts
-source "$HOME/dotfiles/shell/dots_go_up.zsh"
+source "$HOME/dotfiles/shell/alias_dots.zsh"
 
 # tar with exclusion
-source "$HOME/dotfiles/shell/tar_excludes.zsh"
+source "$HOME/dotfiles/shell/alias_tar.zsh"
 
 # distro package shortcuts
 if [[ -f /etc/os-release ]]; then
@@ -71,19 +71,8 @@ if [[ -f /etc/os-release ]]; then
 fi
 
 # Nicer versions of common commands
-
 if command -v eza &>/dev/null; then
-    alias l='eza \
-            -a                        \ # show all files, including hidden ones
-            --classify=always         \ # append indicator (one of */=>@|) to entries
-            -g                        \ # print group name in long format
-            --group-directories-first \ # list directories before other files
-            -h                        \ # human-readable sizes
-            --hyperlink               \ # enable hyperlinks
-            --icons=auto              \ # display icons if supported
-            -l                        \ # use a long listing format
-            -M                        \ # display metadata
-            --time-style=long-iso       # use long ISO time format'
+    source "$HOME/dotfiles/shell/alias_eza.zsh"
 else
     alias l='ls -la'
 fi

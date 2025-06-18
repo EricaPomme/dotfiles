@@ -303,16 +303,17 @@ setup_dotfiles() {
     esac
 
     symlink_pairs="$(
-        cat <<EOF
+cat <<EOF
 # Format: source|destination
 git/gitconfig|${HOME}/.gitconfig
 nvim/config|${HOME}/.config/nvim
+shell/p10k.zsh|${HOME}/.p10k.zsh
 tmux/.tmux.conf.local|${HOME}/.tmux.conf.local
 ${OS_SPECIFIC_SYMLINKS}
 ${ZPROFILE_SOURCE}|${HOME}/.zprofile
 ${ZSHRC_SOURCE}|${HOME}/.zshrc
 EOF
-    )"
+)"
 
     echo "${symlink_pairs}" | grep -v "^#" | grep -v "^$" | while IFS="|" read -r src dst; do
         # Skip empty lines
@@ -508,6 +509,7 @@ main() {
     log_debug "entering main($(join_args "$@"))"
 
     # Important groundwork
+    cd "$(dirname "$0")" || exit 1
     detect_os
 
     if [ "$OS" = "unknown" ]; then
