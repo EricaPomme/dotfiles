@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*)
+        echo "Windows detected. Run update.ps1 with PowerShell instead." >&2
+        exit 0
+        ;;
+esac
+
 set -euo pipefail
 
 DEBUG=${DEBUG:-false}

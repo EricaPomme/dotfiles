@@ -45,3 +45,10 @@ defaults such as your name and email. If you need machine-specific settings or
 credentials, create `~/.gitconfig.local`; it will be loaded automatically but is
 ignored by version control.
 
+### Windows
+
+These dotfiles can also be used on Windows. Ensure you have **winget** and
+PowerShell 7 or later installed. Run `pwsh install.ps1` to set up packages and
+symlinks, and `pwsh update.ps1` to upgrade them. If you are using WSL, you can
+run the existing Bash scripts instead.
+
