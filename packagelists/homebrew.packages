@@ -7,6 +7,12 @@ warp                           # Terminal with AI-assisted features (fast, moder
 xquartz                        # X11 server for macOS (required by some Unix apps)
 fd                             # Fast alternative to find command
 
+# Document Processing
+pandoc                         # Universal document converter (markdown, epub, pdf, etc.)
+basictex                       # Minimal LaTeX distribution for PDF generation
+p7zip                          # File archiver with high compression ratio
+unar                           # Archive extraction tool (supports RAR, CBR, CBZ)
+
 # Security & Privacy
 1password                      # Secure password manager with cloud sync
 1password-cli                  # Command-line tool to interact with 1Password vaults
