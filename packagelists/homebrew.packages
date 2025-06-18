@@ -38,6 +38,7 @@ appcleaner                     # Thoroughly uninstalls apps and their leftover f
 balenaetcher                   # Flashes OS images to USB drives and SD cards
 disk-inventory-x               # Visual disk usage analyzer (treemap style)
 hammerspoon                    # Powerful automation tool for macOS (Lua-based)
+lf                             # Terminal file manager
 middleclick                    # Enables middle click emulation on Mac trackpads
 
 # File Transfer & Cloud
