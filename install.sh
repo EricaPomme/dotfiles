@@ -221,9 +221,9 @@ install_packages() {
                 ;;
             esac
 
-            if command -v flatpak &>/dev/null && [ -f "packagelists/flatpak" ]; then
+            if command -v flatpak &>/dev/null && [ -f "packagelists/flatpak.packages" ]; then
                 log_info "Installing Flatpak packages..."
-                read_packagelist "packagelists/flatpak" | xargs -I{} flatpak install -y --noninteractive flathub {} || log_warning "Some flatpak installs may have failed"
+                read_packagelist "packagelists/flatpak.packages" | xargs -I{} flatpak install -y --noninteractive flathub {} || log_warning "Some flatpak installs may have failed"
             fi
             ;;
         esac
@@ -232,18 +232,18 @@ install_packages() {
     fi
 
     log_debug "installing platform-agnostic packages"
-    if ! $BYPASS_CARGO && [ -f "packagelists/cargo" ]; then
+    if ! $BYPASS_CARGO && [ -f "packagelists/cargo.packages" ]; then
         check_command cargo
         log_info "Installing Cargo packages..."
-        read_packagelist "packagelists/cargo" | xargs cargo install || log_warning "Some cargo installs may have failed"
+        read_packagelist "packagelists/cargo.packages" | xargs cargo install || log_warning "Some cargo installs may have failed"
     elif $BYPASS_CARGO; then
         log_info "BYPASS_CARGO is true, skipping Cargo packages"
     fi
 
-    if ! $BYPASS_NPM && [ -f "packagelists/npm" ]; then
+    if ! $BYPASS_NPM && [ -f "packagelists/npm.packages" ]; then
         check_command npm
         log_info "Installing NPM global packages..."
-        read_packagelist "packagelists/npm" | xargs npm install -g || log_warning "Some npm installs may have failed"
+        read_packagelist "packagelists/npm.packages" | xargs npm install -g || log_warning "Some npm installs may have failed"
     elif $BYPASS_NPM; then
         log_info "BYPASS_NPM is true, skipping NPM packages"
     fi
