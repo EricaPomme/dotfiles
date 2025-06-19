@@ -10,6 +10,9 @@
 # Git pull reminders
 source "${HOME}/dotfiles/shell/git_pull_nudge.zsh"
 
+# Weekly update check
+source "${HOME}/dotfiles/shell/weekly_update_check.zsh"
+
 # iTerm2 goodies
 [[ -f "${HOME}/.iterm2_shell_integration.zsh" ]] && source "${HOME}/.iterm2_shell_integration.zsh" || true
 
