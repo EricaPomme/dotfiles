@@ -8,6 +8,7 @@
 # 1) Shell extras
 # -----------------------------------------------------------------------------
 source "$HOME/dotfiles/shell/git_pull_nudge.zsh" # remind on stale repos
+source "$HOME/dotfiles/shell/weekly_update_check.zsh" # weekly update reminders
 
 # -----------------------------------------------------------------------------
 # 2) Prezto or fallback prompt
