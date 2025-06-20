@@ -7,10 +7,15 @@ These scripts install a minimal environment by linking configuration files and i
 - macOS (Homebrew)
 - Debian/Ubuntu (apt)
 - Fedora (dnf)
-- Arch-based (pacman)
+- Arch-based (pacman) — includes Manjaro, EndeavourOS, CachyOS, Garuda, etc.
 - **NixOS** (nix-env)
 
 NixOS support is intentionally lightweight. If you manage packages declaratively, you can skip running the package installation step.
+
+Common OS detection logic lives in `util.sh`. It exposes functions such as
+`detect_os`, `detect_linux_distro`, and helper predicates like
+`is_arch_based` or `is_debian_based` that other scripts source to tailor
+behavior for each distribution family.
 
 ## Usage
 

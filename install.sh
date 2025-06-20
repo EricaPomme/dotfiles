@@ -4,61 +4,9 @@ set -eu
 
 DEBUG=${DEBUG:-false}
 
-# Bypass controls for major sections
-BYPASS_VERIFY_ESSENTIALS=${BYPASS_VERIFY_ESSENTIALS:-false}
-BYPASS_GIT_REPOS=${BYPASS_GIT_REPOS:-false}
-BYPASS_OS_PACKAGES=${BYPASS_OS_PACKAGES:-false}
-BYPASS_CARGO=${BYPASS_CARGO:-false}
-BYPASS_NPM=${BYPASS_NPM:-false}
-BYPASS_SETUP_DOTFILES=${BYPASS_SETUP_DOTFILES:-false}
-BYPASS_MACOS_DEFAULTS=${BYPASS_MACOS_DEFAULTS:-false}
 
-# Logging helpers
-
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-GREY='\033[0;37m'
-MAGENTA='\033[0;35m'
-RESET='\033[0m'
-
-log_info() {
-    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${CYAN}[INFO]${RESET} $1"
-}
-
-log_debug() {
-    if $DEBUG; then
-        echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${BLUE}[DEBUG]${RESET} $1" >&2
-    fi
-}
-
-log_success() {
-    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${GREEN}[SUCCESS]${RESET} $1"
-}
-
-log_warning() {
-    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${YELLOW}[WARNING]${RESET} $1"
-}
-
-log_error() {
-    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${RED}[ERROR]${RESET} $1" >&2
-}
-
-log_critical() {
-    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${MAGENTA}[CRITICAL]${RESET} $1" >&2
-    exit 1
-}
-
-join_args() {
-    joined=""
-    for arg in "$@"; do
-        joined="$joined$arg, "
-    done
-    # Remove trailing comma and space
-    echo "${joined%, }"
-}
+# Load common helpers
+source "$(dirname "$0")/util.sh"
 
 # Check if a command is available in the system's PATH
 #
@@ -77,60 +25,6 @@ check_command() {
         log_critical "Required command '$1' not found. Please install it."
     fi
     log_debug "exiting check_command($(join_args "$@"))"
-}
-
-# Detects the operating system of the current environment
-#
-# This function determines whether the script is running on Linux or macOS
-# by examining the output of 'uname -s'. It sets the global variable OS
-# to either "linux" or "macos" accordingly. If an unrecognized operating
-# system is detected, the global variable OS will be set to "unknown" and
-# the script will continue with limited functionality.
-#
-# Arguments:
-#   None
-#
-# Returns:
-#   None - Sets the global variable OS to the detected operating system
-#           (or "unknown" if unrecognized)
-detect_os() {
-    log_debug "entering detect_os($(join_args "$@"))"
-    case "$(uname -s)" in
-    Linux*) OS="linux" ;;
-    Darwin*) OS="macos" ;;
-    *)
-        OS="unknown"
-        log_warning "Unrecognized OS: $(uname -s). Some features will be skipped."
-        ;;
-    esac
-    log_info "Detected OS: $OS"
-    log_debug "exiting detect_os($(join_args "$@"))"
-}
-
-# Detects the Linux distribution of the current environment
-#
-# This function determines the specific Linux distribution by sourcing
-# the /etc/os-release file, which contains distribution identification data.
-# It sets the global variable DISTRO_ID to the lowercase value of the ID field
-# from os-release. If the os-release file is not found, the script will exit
-# with an error.
-#
-# Arguments:
-#   None
-#
-# Returns:
-#   None - Sets the global variable DISTRO_ID to the detected Linux distribution
-#   Exits with error if the distribution cannot be detected
-detect_linux_distro() {
-    log_debug "entering detect_linux_distro($(join_args "$@"))"
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        DISTRO_ID="${ID,,}"
-    else
-        log_critical "Unable to detect Linux distribution"
-    fi
-    log_info "Detected Linux distribution: $DISTRO_ID"
-    log_debug "exiting detect_linux_distro($(join_args "$@"))"
 }
 
 # Reads and processes a package list file
@@ -169,8 +63,7 @@ install_packages() {
     log_debug "entering install_packages($(join_args "$@"))"
 
     if ! $BYPASS_OS_PACKAGES; then
-        case "$OS" in
-        macos)
+        if [ "$OS" = "macos" ]; then
             log_debug "installing macOS packages"
             if [ -f "packagelists/homebrew.packages" ]; then
                 check_command brew
@@ -182,51 +75,49 @@ install_packages() {
                 log_info "Installing Homebrew casks..."
                 read_packagelist "packagelists/homebrew.casks" | xargs brew install --cask || log_warning "Some cask installs may have failed"
             fi
-            ;;
-        linux)
+        elif [ "$OS" = "linux" ]; then
             log_debug "installing Linux packages"
             detect_linux_distro
-            case "$DISTRO_ID" in
-            ubuntu | debian)
-                if [ -f "packagelists/deb.packages" ]; then
-                    check_command apt
-                    log_info "Installing APT packages..."
-                    sudo apt-get update
-                    read_packagelist "packagelists/deb.packages" | xargs sudo apt-get install -y || log_warning "Some apt installs may have failed"
-                fi
-                ;;
-            fedora)
-                if [ -f "packagelists/fedora.packages" ]; then
-                    check_command dnf
-                    log_info "Installing DNF packages..."
-                    read_packagelist "packagelists/fedora.packages" | xargs sudo dnf install -y || log_warning "Some dnf installs may have failed"
-                fi
-                ;;
-            arch | endeavouros | cachyos | garuda)
-                if [ -f "packagelists/pacman.packages" ]; then
-                    check_command pacman
-                    log_info "Installing Pacman packages..."
-                    read_packagelist "packagelists/pacman.packages" | xargs -r sudo pacman -S --noconfirm --needed || log_warning "Some pacman installs may have failed"
-                fi
-                ;;
-            nixos)
-                if [ -f "packagelists/nix.packages" ]; then
-                    check_command nix-env
-                    log_info "Installing Nix packages..."
-                    read_packagelist "packagelists/nix.packages" | xargs nix-env -iA nixos || log_warning "Some nix installs may have failed"
-                fi
-                ;;
-            *)
-                log_warning "Unsupported Linux distribution: $DISTRO_ID"
-                ;;
+            case "$(distro_family)" in
+                debian)
+                    if [ -f "packagelists/deb.packages" ]; then
+                        check_command apt
+                        log_info "Installing APT packages..."
+                        sudo apt-get update
+                        read_packagelist "packagelists/deb.packages" | xargs sudo apt-get install -y || log_warning "Some apt installs may have failed"
+                    fi
+                    ;;
+                fedora)
+                    if [ -f "packagelists/fedora.packages" ]; then
+                        check_command dnf
+                        log_info "Installing DNF packages..."
+                        read_packagelist "packagelists/fedora.packages" | xargs sudo dnf install -y || log_warning "Some dnf installs may have failed"
+                    fi
+                    ;;
+                arch)
+                    if [ -f "packagelists/pacman.packages" ]; then
+                        check_command pacman
+                        log_info "Installing Pacman packages..."
+                        read_packagelist "packagelists/pacman.packages" | xargs -r sudo pacman -S --noconfirm --needed || log_warning "Some pacman installs may have failed"
+                    fi
+                    ;;
+                nixos)
+                    if [ -f "packagelists/nix.packages" ]; then
+                        check_command nix-env
+                        log_info "Installing Nix packages..."
+                        read_packagelist "packagelists/nix.packages" | xargs nix-env -iA nixos || log_warning "Some nix installs may have failed"
+                    fi
+                    ;;
+                *)
+                    log_warning "Unsupported Linux distribution: $DISTRO_ID"
+                    ;;
             esac
 
             if command -v flatpak &>/dev/null && [ -f "packagelists/flatpak.packages" ]; then
                 log_info "Installing Flatpak packages..."
                 read_packagelist "packagelists/flatpak.packages" | xargs -I{} flatpak install -y --noninteractive flathub {} || log_warning "Some flatpak installs may have failed"
             fi
-            ;;
-        esac
+        fi
     else
         log_info "BYPASS_OS_PACKAGES is true, skipping OS package installation"
     fi
@@ -283,24 +174,20 @@ setup_dotfiles() {
 
     # Use a fully POSIX-compliant approach with newline-separated pairs
     # OS-specific zshrc selection and symlink configuration
-    case "$OS" in
-    macos)
+    if [ "$OS" = "macos" ]; then
         ZSHRC_SOURCE="shell/zshrc_macos"
         ZPROFILE_SOURCE="shell/zprofile_macos"
         OS_SPECIFIC_SYMLINKS="hammerspoon|${HOME}/.hammerspoon"
-        ;;
-    linux)
+    elif [ "$OS" = "linux" ]; then
         ZSHRC_SOURCE="shell/zshrc_linux"
         ZPROFILE_SOURCE="shell/zprofile_linux"
         OS_SPECIFIC_SYMLINKS=""
-        ;;
-    *)
+    else
         log_warning "Unknown OS: $OS, defaulting to Linux zshrc"
         ZSHRC_SOURCE="shell/zshrc_linux"
         ZPROFILE_SOURCE="shell/zprofile_linux"
         OS_SPECIFIC_SYMLINKS=""
-        ;;
-    esac
+    fi
 
     symlink_pairs="$(
 cat <<EOF

@@ -4,14 +4,8 @@ set -euo pipefail
 
 DEBUG=${DEBUG:-false}
 
-# Bypass controls for major sections
-BYPASS_OS_UPDATES=${BYPASS_OS_UPDATES:-false}
-BYPASS_CARGO=${BYPASS_CARGO:-false}
-BYPASS_NPM=${BYPASS_NPM:-false}
-BYPASS_GIT_REPOS=${BYPASS_GIT_REPOS:-false}
-
 # Load shared logging and utility functions
-source "$(dirname "$0")/install.sh"
+source "$(dirname "$0")/util.sh"
 
 # Pull updates for any git-based tools installed by install.sh
 update_git_repos() {
@@ -43,43 +37,40 @@ function update_all() {
 
   if ! $BYPASS_OS_UPDATES; then
     # Update package managers
-    case "$OS" in
-      macos)
-        if command -v brew &>/dev/null; then
-          log_info "Updating Homebrew..."
-          brew update && brew upgrade || log_warning "Homebrew update failed"
-        fi
-        ;;
-      linux)
-        detect_linux_distro
-        case "$DISTRO_ID" in
-          ubuntu | debian)
-            if command -v apt-get &>/dev/null; then
-              log_info "Updating APT..."
-              sudo apt-get update && sudo apt-get upgrade -y || log_warning "APT update failed"
-            fi
-            ;;
-          fedora)
-            if command -v dnf &>/dev/null; then
-              log_info "Updating DNF..."
-              sudo dnf upgrade -y || log_warning "DNF update failed"
-            fi
-            ;;
-          arch | endeavouros | cachyos | garuda)
-            if command -v pacman &>/dev/null; then
-              log_info "Updating Pacman..."
-              sudo pacman -Syu --noconfirm || log_warning "Pacman update failed"
-            fi
-            ;;
-          nixos)
-            if command -v nix-env &>/dev/null; then
-              log_info "Updating Nix packages..."
-              nix-env --upgrade || log_warning "Nix update failed"
-            fi
-            ;;
-        esac
-        ;;
-    esac
+    if [ "$OS" = "macos" ]; then
+      if command -v brew &>/dev/null; then
+        log_info "Updating Homebrew..."
+        brew update && brew upgrade || log_warning "Homebrew update failed"
+      fi
+    elif [ "$OS" = "linux" ]; then
+      detect_linux_distro
+      case "$(distro_family)" in
+        debian)
+          if command -v apt-get &>/dev/null; then
+            log_info "Updating APT..."
+            sudo apt-get update && sudo apt-get upgrade -y || log_warning "APT update failed"
+          fi
+          ;;
+        fedora)
+          if command -v dnf &>/dev/null; then
+            log_info "Updating DNF..."
+            sudo dnf upgrade -y || log_warning "DNF update failed"
+          fi
+          ;;
+        arch)
+          if command -v pacman &>/dev/null; then
+            log_info "Updating Pacman..."
+            sudo pacman -Syu --noconfirm || log_warning "Pacman update failed"
+          fi
+          ;;
+        nixos)
+          if command -v nix-env &>/dev/null; then
+            log_info "Updating Nix packages..."
+            nix-env --upgrade || log_warning "Nix update failed"
+          fi
+          ;;
+      esac
+    fi
   else
     log_info "BYPASS_OS_UPDATES is true, skipping OS package updates"
   fi
