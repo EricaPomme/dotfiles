@@ -266,9 +266,13 @@ verify_essentials() {
     check_command git
     check_command zsh
     check_command curl
-    check_command cargo
+    if ! $BYPASS_CARGO; then
+        check_command cargo
+    fi
     [ "$OS" = "macos" ] && check_command brew
-    [ "$OS" = "linux" ] && check_command flatpak
+    if [ "$OS" = "linux" ] && ! $BYPASS_OS_PACKAGES; then
+        check_command flatpak
+    fi
 
     ZSH_PATH=$(command -v zsh)
     if [ "$SHELL" != "$ZSH_PATH" ]; then
