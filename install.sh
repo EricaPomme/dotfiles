@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*)
+        echo "Windows detected. Run install.ps1 with PowerShell instead." >&2
+        exit 0
+        ;;
+esac
+
 set -eu
 
 DEBUG=${DEBUG:-false}
