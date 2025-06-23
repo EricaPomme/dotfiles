@@ -206,13 +206,21 @@ local urlHandlers = {
 
     -- Shopping
     {
-        name = "Amazon",
-        match = function(url) return url:match("^https?://[www%.]*amazon%.([%w%.]+)") end,
-        transform = function(url)
-            local pid = url:match("/[dgp]+/product/([A-Z0-9]+)")
-            local domain = url:match("^https?://[www%.]*amazon%.([%w%.]+)") or "com"
-            return pid and string.format("https://amazon.%s/dp/%s", domain, pid) or url
+    name = "Amazon",
+    match = function(url)
+        return url:match("^https?://[www%.]*amazon%.([%w%.]+)")
+    end,
+    transform = function(url)
+        -- catch both /dp/ASIN and /gp/product/ASIN
+        local pid = url:match("/dp/([A-Z0-9]+)") 
+                    or url:match("/gp/product/([A-Z0-9]+)")
+        local domain = url:match("^https?://[www%.]*amazon%.([%w%.]+)") or "com"
+        if pid then
+        return string.format("https://amazon.%s/dp/%s", domain, pid)
         end
+        -- as a last resort, strip query strings and trailing slashes
+        return url:gsub("%?.*$", ""):gsub("/+$", "")
+    end
     },
 
     -- Filthy degeneracy
