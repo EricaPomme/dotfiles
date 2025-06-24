@@ -91,6 +91,10 @@ if command -v pdu &>/dev/null; then
     alias du='pdu --top-down --progress --silent-errors'
 fi
 
+# Dotfiles management
+alias dotfile-install='(cd ~/dotfiles && git pull && ./install.sh) || echo "Failed to pull or install"'
+alias dotfile-update='(cd ~/dotfiles && git pull && ./update.sh) || echo "Failed to pull or update"'
+
 # -----------------------------------------------------------------------------
 # 6) Prompt niceties & completions
 # -----------------------------------------------------------------------------
