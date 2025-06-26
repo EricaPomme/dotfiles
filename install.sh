@@ -189,16 +189,15 @@ setup_dotfiles() {
         OS_SPECIFIC_SYMLINKS=""
     fi
 
-    symlink_pairs="$(
-cat <<EOF
-# Format: source|destination
-git/gitconfig|${HOME}/.gitconfig
-nvim/config|${HOME}/.config/nvim
-shell/p10k.zsh|${HOME}/.p10k.zsh
-tmux/.tmux.conf.local|${HOME}/.tmux.conf.local
-${OS_SPECIFIC_SYMLINKS}
-${ZPROFILE_SOURCE}|${HOME}/.zprofile
-${ZSHRC_SOURCE}|${HOME}/.zshrc
+    symlink_pairs="$(cat <<EOF | sed 's/^[[:space:]]*//'
+        # Format: source|destination
+        git/gitconfig|${HOME}/.gitconfig
+        nvim/config|${HOME}/.config/nvim
+        shell/p10k.zsh|${HOME}/.p10k.zsh
+        tmux/.tmux.conf.local|${HOME}/.tmux.conf.local
+        ${OS_SPECIFIC_SYMLINKS}
+        ${ZPROFILE_SOURCE}|${HOME}/.zprofile
+        ${ZSHRC_SOURCE}|${HOME}/.zshrc
 EOF
 )"
 
