@@ -42,6 +42,7 @@ disk-inventory-x               # Visual disk usage analyzer (treemap style)
 hammerspoon                    # Powerful automation tool for macOS (Lua-based)
 lf                             # Terminal file manager
 middleclick                    # Enables middle click emulation on Mac trackpads
+mas                            # Mac App Store CLI
 
 # File Transfer & Cloud
 cyberduck                      # FTP/SFTP/WebDAV/cloud storage browser with GUI
@@ -50,3 +51,4 @@ cyberduck                      # FTP/SFTP/WebDAV/cloud storage browser with GUI
 discord                        # Voice, video, and text chat for communities/gaming
 gdu
 imagemagick
+up
