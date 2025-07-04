@@ -73,7 +73,8 @@ detect_os() {
 detect_linux_distro() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
-        DISTRO_ID="${ID,,}"
+        # Use tr for lowercase conversion (portable across shells)
+        DISTRO_ID="$(echo "$ID" | tr '[:upper:]' '[:lower:]')"
     else
         DISTRO_ID="unknown"
     fi
