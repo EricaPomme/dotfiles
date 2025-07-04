@@ -51,17 +51,11 @@ font-hack-nerd-font            # Hack font patched with Nerd Font icons
 # =============================
 
 # Core Development Tools
-autoconf                       # Automatic configure script builder
-cmake                          # Cross-platform build system generator
 git                            # Distributed version control system
 git-lfs                        # Git extension for versioning large files
 go                             # Go programming language
-llvm                           # Next-gen compiler infrastructure
-make                           # Build automation tool
 node                           # JavaScript runtime built on V8
 pyenv                          # Python version management
-python@3.10                    # Python programming language v3.10
-python@3.13                    # Python programming language v3.13
 rust                           # Systems programming language
 
 # Shell & Terminal Tools
@@ -80,17 +74,14 @@ shfmt                          # Shell script formatter
 tldr                           # Simplified man pages
 tmux                           # Terminal multiplexer
 tree                           # Display directories as trees
-zsh                            # Z shell
 
 # Package Management
 mas                            # Mac App Store CLI
 pipx                           # Install and run Python applications in isolated environments
 
 # Networking & Security
-curl                           # Command-line file transfer tool
 gnupg                          # GNU Privacy Guard
 nmap                           # Network exploration and security scanner
-openssl@3                      # Cryptography and SSL/TLS toolkit
 ssh-copy-id                    # Install SSH keys on remote hosts
 wget                           # Internet file retriever
 ykman                          # YubiKey Manager CLI
@@ -106,86 +97,3 @@ p7zip                          # File archiver with high compression ratio
 pandoc                         # Universal document converter
 unar                           # Archive extraction tool
 up                             # Ultimate Plumber - pipeline building tool
-
-# System Libraries & Dependencies
-# (Auto-installed by Homebrew as dependencies)
-abseil
-aom
-brotli
-c-ares
-ca-certificates
-cffi
-cryptography
-emacs
-fontconfig
-freetype
-gdbm
-gettext
-giflib
-glib
-gmp
-gnutls
-highway
-icu4c@77
-imath
-jasper
-jpeg-turbo
-jpeg-xl
-libassuan
-libde265
-libdeflate
-libevent
-libgcrypt
-libgit2
-libgpg-error
-libheif
-libidn2
-libksba
-liblinear
-liblqr
-libnghttp2
-libomp
-libpng
-libraw
-libssh2
-libtasn1
-libtiff
-libtool
-libunistring
-libusb
-libuv
-libvmaf
-libzip
-little-cms2
-lpeg
-lua
-luajit
-luv
-lz4
-m4
-mpdecimal
-ncurses
-nettle
-npth
-oniguruma
-openexr
-openjpeg
-p11-kit
-pcre2
-pinentry
-pkgconf
-protobuf
-pycparser
-readline
-rtmpdump
-shared-mime-info
-sqlite
-tree-sitter
-unbound
-unibilium
-utf8proc
-webp
-x265
-xz
-z3
-zstd
