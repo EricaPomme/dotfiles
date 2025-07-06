@@ -196,6 +196,7 @@ git/gitconfig|${HOME}/.gitconfig
 nvim/config|${HOME}/.config/nvim
 shell/p10k.zsh|${HOME}/.p10k.zsh
 tmux/.tmux.conf.local|${HOME}/.tmux.conf.local
+${HOME}/Library/CloudStorage/Dropbox/|${HOME}/Dropbox
 ${OS_SPECIFIC_SYMLINKS}
 ${ZPROFILE_SOURCE}|${HOME}/.zprofile
 ${ZSHRC_SOURCE}|${HOME}/.zshrc
