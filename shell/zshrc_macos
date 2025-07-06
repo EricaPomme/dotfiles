@@ -1,83 +1,64 @@
-# ~/dotfiles/shell/zshrc_macos
-# -----------------------------------------------------------------------------
-# 0) Not interactive? bail early
-# -----------------------------------------------------------------------------
+# Bail if non-interactive
 [[ $- != *i* ]] && return
 
-# -----------------------------------------------------------------------------
-# 1) Shell integrations & extras (interactive only)
-# -----------------------------------------------------------------------------
-# Git pull reminders
-source "${HOME}/dotfiles/shell/git_pull_nudge.zsh"
+# Flags and other important variables
+DEBUG=${DEBUG:-false}
+LOADED_EXTRAS=()
 
-# Weekly update check
-source "${HOME}/dotfiles/shell/weekly_update_check.zsh"
+# Source shell integrations and extras (interactive only)
+# Note that list_shell_extras is using a tagging + relative path convention
+list_shell_extras=(
+  "home/.iterm2_shell_integration.zsh" # iTerm2 shell integration
+  "home/.zprezto/init.zsh"             # Load prezto if we have it
+  "shell/alias_eza.zsh"                # Pretty ls alternative + preferences
+  "shell/alias_dots.zsh"               # Dots for to go up good and fastly
+  "shell/fzf.zsh"                      # Fuzzy Finder
+  "shell/alias_tar.zsh"                # Tar with exclusions
+  "shell/git_pull_nudge.zsh"           # Did you forget to pull? (Yes.)
+  "shell/weekly_update_check.zsh"      # Check for updates weekly
+)
 
-# iTerm2 goodies
-[[ -f "${HOME}/.iterm2_shell_integration.zsh" ]] && source "${HOME}/.iterm2_shell_integration.zsh" || true
-
-# -----------------------------------------------------------------------------
-# 2) Prezto or fallback prompt + options
-# -----------------------------------------------------------------------------
-if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
-    source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
-else
-fi
-
-# -----------------------------------------------------------------------------
-# 3) FZF: fast fuzzy search
-# -----------------------------------------------------------------------------
-# Pick fd > rg > find
-if command -v fd &>/dev/null; then
-    export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix --hidden --follow --exclude .git'
-elif command -v rg &>/dev/null; then
-    export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
-else
-    export FZF_DEFAULT_COMMAND='find . -path "*/\.*" -prune -o -type f -print 2>/dev/null | cut -b3-'
-fi
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_ALT_C_COMMAND='fd --type d --strip-cwd-prefix --hidden --follow --exclude .git'
-export FZF_DEFAULT_OPTS='--height 60% --layout=reverse --border --preview "head -100 {}" --preview-window=right:50%:wrap'
-
-# Source key-bindings & completions
-for p in /opt/homebrew/opt/fzf/shell/key-bindings.zsh \
-    /usr/local/opt/fzf/shell/key-bindings.zsh \
-    "$HOME/.fzf/shell/key-bindings.zsh"; do
-    [[ -f $p ]] && source $p && break
+for rel_path in "${list_shell_extras[@]}"; do
+  case $rel_path in
+  shell/*)
+    full_path="${HOME}/dotfiles/${rel_path}"
+    ;;
+  home/*)
+    full_path="${HOME}/${rel_path#home/}"
+    ;;
+  *)
+    full_path="${rel_path}"
+    ;;
+  esac
+  if [[ ! " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]] && [[ -f "$full_path" ]]; then
+    LOADED_EXTRAS+=("${full_path}")
+    source "$full_path"
+    if [[ $DEBUG == true ]] && [[ ! " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]]; then
+      echo "Loaded shell extra: ${full_path}"
+    fi
+  else
+    if [[ $DEBUG == true ]]; then
+      if [[ ! -f "$full_path" ]]; then
+        echo "Skipping missing shell extra: ${full_path}"
+      elif [[ " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]]; then
+        echo "Skipping already loaded shell extra: ${full_path}"
+      fi
+    fi
+  fi
 done
-for p in /opt/homebrew/opt/fzf/shell/completion.zsh \
-    /usr/local/opt/fzf/shell/completion.zsh \
-    /usr/share/fzf/completion.zsh \
-    /usr/share/doc/fzf/examples/completion.zsh \
-    "$HOME/.fzf/shell/completion.zsh"; do
-    [[ -f $p ]] && source $p && break
-done
-
-# -----------------------------------------------------------------------------
-# 4) Aliases & handy functions
-# -----------------------------------------------------------------------------
-# “.” up shortcuts
-source "$HOME/dotfiles/shell/alias_dots.zsh"
 
 # eza or ls
-if command -v eza &>/dev/null; then
-    source "$HOME/dotfiles/shell/alias_eza.zsh"
-else
-    alias l='ls -la'
-fi
-
-# tar command with excludes
-source "$HOME/dotfiles/shell/alias_tar.zsh"
+command -v eza &>/dev/null || alias l='ls -l'
 
 # WAN IP lookups
 ipv4() { curl -4fsSL https://ifconfig.me; }
 ipv6() {
-    if command -v ip &>/dev/null; then
-        ip -6 addr show scope global | grep -oP '(?<=inet6 )[0-9A-Fa-f:]+' ||
-            ip -6 addr show scope link | grep -oP '(?<=inet6 )[0-9A-Fa-f:]+'
-    else
-        ifconfig | awk '/inet6/&&!/fe80/ {print $2}'
-    fi
+  if command -v ip &>/dev/null; then
+    ip -6 addr show scope global | grep -oP '(?<=inet6 )[0-9A-Fa-f:]+' ||
+      ip -6 addr show scope link | grep -oP '(?<=inet6 )[0-9A-Fa-f:]+'
+  else
+    ifconfig | awk '/inet6/&&!/fe80/ {print $2}'
+  fi
 }
 
 # UpNote piping
@@ -88,22 +69,20 @@ alias gdu='gdu-go'
 
 # pdu (parallel disk usage) - better du replacement
 if command -v pdu &>/dev/null; then
-    alias du='pdu --top-down --progress --silent-errors'
+  alias du='pdu --top-down --progress --silent-errors'
 fi
 
 # Dotfiles management
 alias dotfile-install='(cd ~/dotfiles && git pull && ./install.sh) || echo "Failed to pull or install"'
 alias dotfile-update='(cd ~/dotfiles && git pull && ./update.sh) || echo "Failed to pull or update"'
 
-# -----------------------------------------------------------------------------
-# 6) Prompt niceties & completions
-# -----------------------------------------------------------------------------
-autoload -Uz promptinit
-promptinit
-prompt powerlevel10k
-
-zstyle ':completion:*' menu select
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+if [[ "$LOADED_EXTRAS" =~ "/.zprezto/init.zsh" ]]; then
+  autoload -Uz promptinit
+  promptinit
+  prompt powerlevel10k
+fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+if [[ -f ~/.p10k.zsh ]] && [[ "$LOADED_EXTRAS" =~ "/.zprezto/init.zsh" ]]; then
+  source ~/.p10k.zsh
+fi
