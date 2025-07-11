@@ -28,6 +28,7 @@ networkmanager
 modemmanager
 usb_modeswitch
 mobile-broadband-provider-info
+tailscale
 
 # GUI tools
 pamac-aur
