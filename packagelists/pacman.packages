@@ -12,6 +12,7 @@ ripgrep
 fd
 bat
 lolcat
+lnav
 
 # Development tools
 git
