@@ -37,6 +37,7 @@ yubico-yubikey-manager         # Manage and configure YubiKey hardware security 
 # File Transfer & Cloud
 cyberduck                      # FTP/SFTP/WebDAV/cloud storage browser with GUI
 dropbox                        # Cloud storage and file synchronization service
+magic-wormhole                 # Secure file transfer tool (send files with transit codes)
 
 # Communication & Social
 discord                        # Voice, video, and text chat for communities/gaming
