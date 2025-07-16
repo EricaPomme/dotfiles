@@ -101,14 +101,9 @@ ipv6() {
 command -v xdg-open &>/dev/null && alias open='xdg-open'
 
 # -----------------------------------------------------------------------------
-# 6) Prompt theme & system info
+# 6) Custom prompt (overrides Prezto's prompt)
 # -----------------------------------------------------------------------------
-if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
-    autoload -Uz promptinit
-    promptinit
-    prompt paradox
-    RPROMPT=''
-fi
+source "$HOME/dotfiles/shell/prompt.zsh"
 
 if command -v fastfetch &>/dev/null; then
     clear
