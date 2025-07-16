@@ -3,6 +3,7 @@
 # 1) PATH configuration (login shells)
 # -----------------------------------------------------------------------------
 typeset -U path
+[[ -d "$HOME/.cargo/bin" ]]       && path=("$HOME/.cargo/bin"       $path)  # cargo packages
 [[ -d "$HOME/.local/bin" ]]       && path=("$HOME/.local/bin"       $path)  # personal scripts/bins
 [[ -d "$HOME/dotfiles/scripts" ]] && path=("$HOME/dotfiles/scripts" $path)  # repo tools
 [[ -d "/usr/local/bin" ]]         && path=("/usr/local/bin"         $path)  # system-wide
