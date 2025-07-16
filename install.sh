@@ -195,6 +195,7 @@ setup_dotfiles() {
         nvim/config|${HOME}/.config/nvim
         shell/p10k.zsh|${HOME}/.p10k.zsh
         tmux/.tmux.conf.local|${HOME}/.tmux.conf.local
+        
         ${OS_SPECIFIC_SYMLINKS}
         ${ZPROFILE_SOURCE}|${HOME}/.zprofile
         ${ZSHRC_SOURCE}|${HOME}/.zshrc

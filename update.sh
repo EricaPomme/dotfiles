@@ -42,6 +42,11 @@ function update_all() {
         log_info "Updating Homebrew..."
         brew update && brew upgrade || log_warning "Homebrew update failed"
       fi
+
+      if command -v softwareupdate &>/dev/null; then
+        log_info "Applying Apple system updates (softwareupdate)..."
+        sudo softwareupdate --all --install --force || log_warning "Apple softwareupdate failed"
+      fi
     elif [ "$OS" = "linux" ]; then
       detect_linux_distro
       case "$(distro_family)" in

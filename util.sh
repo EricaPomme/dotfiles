@@ -64,7 +64,6 @@ detect_os() {
         Darwin*) OS="macos" ;;
         *) OS="unknown" ;;
     esac
-    echo "$OS"
 }
 
 # Detect the Linux distribution via /etc/os-release
@@ -73,11 +72,11 @@ detect_os() {
 detect_linux_distro() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
-        DISTRO_ID="${ID,,}"
+        # Use tr for lowercase conversion (portable across shells)
+        DISTRO_ID="$(echo "$ID" | tr '[:upper:]' '[:lower:]')"
     else
         DISTRO_ID="unknown"
     fi
-    echo "$DISTRO_ID"
 }
 
 # Map $DISTRO_ID to a higher level family name

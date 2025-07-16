@@ -19,11 +19,11 @@ _check_weekly_update() {
             if [[ $REPLY =~ ^[Yy]$ ]]; then
                 "${HOME}/dotfiles/update.sh"
             fi
-            echo "$current_time" > "$timestamp_file"
+            echo "$current_time" >! "$timestamp_file"
         fi
     else
         # First time setup - create timestamp file
-        echo "$current_time" > "$timestamp_file"
+        echo "$current_time" >! "$timestamp_file"
     fi
 }
 

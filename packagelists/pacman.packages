@@ -12,6 +12,7 @@ ripgrep
 fd
 bat
 lolcat
+lnav
 
 # Development tools
 git
@@ -28,7 +29,9 @@ networkmanager
 modemmanager
 usb_modeswitch
 mobile-broadband-provider-info
+tailscale
 
 # GUI tools
 pamac-aur
 wl-clipboard
+sunshine

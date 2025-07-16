@@ -1,52 +1,100 @@
-dropbox
+# HOMEBREW CASKS (GUI Applications)
+# ==================================
 
 # Developer Tools
-docker                         # Containerization platform (develop, ship, run apps)
+1password                      # Secure password manager with cloud sync
+1password-cli                  # Command-line tool to interact with 1Password vaults  
 firefox                        # Open-source web browser (focus on privacy and performance)
-pipx                           # Install and run Python applications in isolated environments
+iterm2                         # Advanced terminal emulator for macOS
 visual-studio-code             # Lightweight code editor with rich extension ecosystem
 warp                           # Terminal with AI-assisted features (fast, modern UX)
 xquartz                        # X11 server for macOS (required by some Unix apps)
-fd                             # Fast alternative to find command
 
 # Document Processing
-pandoc                         # Universal document converter (markdown, epub, pdf, etc.)
 basictex                       # Minimal LaTeX distribution for PDF generation
-p7zip                          # File archiver with high compression ratio
-unar                           # Archive extraction tool (supports RAR, CBR, CBZ)
-
-# Security & Privacy
-1password                      # Secure password manager with cloud sync
-1password-cli                  # Command-line tool to interact with 1Password vaults
-signal                         # Encrypted messaging app (Signal protocol)
-yubico-yubikey-manager         # Manage and configure YubiKey hardware security keys
-
-# Media & Design
 calibre                        # E-book library management and conversion tool
+textsniper                     # Extract text from images using OCR technology
+
+# Media & Design  
 gimp                           # Open-source image editor (Photoshop alternative)
 gqrx                           # Software-defined radio (SDR) receiver application
+vlc                            # Versatile media player supporting many formats
 
 # Game Streaming / Virtualization
 moonlight                      # Game streaming client (NVIDIA GameStream)
 parsec                         # Low-latency remote desktop / game streaming tool
 utm                            # Virtualization tool for running OSes on Apple Silicon and Intel Macs
 
-# Productivity & Notes
-scroll-reverser                # Reverses scroll direction for mouse/trackpad independently
-# textsniper                     # Extract text from images using OCR technology
-
 # System Utilities
 appcleaner                     # Thoroughly uninstalls apps and their leftover files
 balenaetcher                   # Flashes OS images to USB drives and SD cards
 disk-inventory-x               # Visual disk usage analyzer (treemap style)
 hammerspoon                    # Powerful automation tool for macOS (Lua-based)
-lf                             # Terminal file manager
 middleclick                    # Enables middle click emulation on Mac trackpads
+scroll-reverser                # Reverses scroll direction for mouse/trackpad independently
+yubico-yubikey-manager         # Manage and configure YubiKey hardware security keys
 
 # File Transfer & Cloud
 cyberduck                      # FTP/SFTP/WebDAV/cloud storage browser with GUI
+dropbox                        # Cloud storage and file synchronization service
+magic-wormhole                 # Secure file transfer tool (send files with transit codes)
 
 # Communication & Social
 discord                        # Voice, video, and text chat for communities/gaming
-gdu
-imagemagick
+signal                         # Encrypted messaging app (Signal protocol)
+telegram                       # Cloud-based instant messaging app
+
+# Fonts
+font-hack-nerd-font            # Hack font patched with Nerd Font icons
+
+
+# HOMEBREW FORMULAE (CLI Tools)
+# =============================
+
+# Core Development Tools
+git                            # Distributed version control system
+git-lfs                        # Git extension for versioning large files
+go                             # Go programming language
+node                           # JavaScript runtime built on V8
+pyenv                          # Python version management
+rust                           # Systems programming language
+
+# Shell & Terminal Tools
+bat                            # Cat clone with syntax highlighting
+coreutils                      # GNU core utilities (gls, gdate, etc.)
+eza                            # Modern replacement for ls
+fastfetch                      # Fast system info fetcher
+fd                             # Fast alternative to find command
+fzf                            # Command-line fuzzy finder
+htop                           # Interactive process viewer
+jq                             # Command-line JSON processor
+lf                             # Terminal file manager
+neovim                         # Hyperextensible Vim-based text editor
+ripgrep                        # Fast recursive grep alternative
+shfmt                          # Shell script formatter
+tldr                           # Simplified man pages
+tmux                           # Terminal multiplexer
+tree                           # Display directories as trees
+
+# Package Management
+mas                            # Mac App Store CLI
+pipx                           # Install and run Python applications in isolated environments
+
+# Networking & Security
+gnupg                          # GNU Privacy Guard
+nmap                           # Network exploration and security scanner
+ssh-copy-id                    # Install SSH keys on remote hosts
+wget                           # Internet file retriever
+ykman                          # YubiKey Manager CLI
+
+# Container & Virtualization
+docker                         # Containerization platform
+docker-completion              # Shell completion for Docker
+
+# File Processing
+gdu                            # Disk usage analyzer with console interface
+imagemagick                    # Image manipulation tools
+p7zip                          # File archiver with high compression ratio  
+pandoc                         # Universal document converter
+unar                           # Archive extraction tool
+up                             # Ultimate Plumber - pipeline building tool

@@ -6,6 +6,7 @@ special installation methods that can't be automated via package managers.
 ## Applications requiring manual download/installation:
 
 - pdu (parallel-disk-usage) - installed manually from GitHub release
+- xrdp - installed via AUR (yay -S xrdp)
 
 ## Configuration Notes:
 - Remember to sign into accounts after installation
