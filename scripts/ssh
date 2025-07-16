@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# SSH wrapper to handle Dropbox config permissions and sync Windows SSH keys in WSL
+
+# Dynamic path discovery
+find_windows_user_dir() {
+    # Look for Windows user directory patterns
+    for base in /mnt/c/Users /mnt/c/users; do
+        if [[ -d "$base" ]]; then
+            # Find directories that look like user directories and have both Dropbox and .ssh
+            for userdir in "$base"/*; do
+                if [[ -d "$userdir" && -d "$userdir/Dropbox" && -d "$userdir/.ssh" ]]; then
+                    # Skip system directories
+                    if [[ "$(basename "$userdir")" != "All Users" && "$(basename "$userdir")" != "Default" ]]; then
+                        echo "$userdir"
+                        return 0
+                    fi
+                fi
+            done
+        fi
+    done
+    return 1
+}
+
+# Find Windows user directory
+WIN_USER_DIR=$(find_windows_user_dir)
+if [[ -z "$WIN_USER_DIR" ]]; then
+    echo "Warning: Could not find Windows user directory with Dropbox" >&2
+    exec /usr/bin/ssh "$@"
+fi
+
+DROPBOX_CONFIG="$WIN_USER_DIR/Dropbox/.config/common.ssh.cfg"
+WIN_SSH_DIR="$WIN_USER_DIR/.ssh"
+LOCAL_CONFIG="/tmp/ssh_config_$$"
+LOCAL_SSH_DIR="$HOME/.ssh"
+
+# Ensure local .ssh directory exists
+mkdir -p "$LOCAL_SSH_DIR"
+
+# Sync SSH keys from Windows to WSL
+if [[ -d "$WIN_SSH_DIR" ]]; then
+    # Remove existing identity files
+    rm -f "$LOCAL_SSH_DIR"/id_*
+    
+    # Copy Windows SSH keys with proper permissions
+    for keyfile in "$WIN_SSH_DIR"/id_*; do
+        if [[ -f "$keyfile" ]]; then
+            keyname=$(basename "$keyfile")
+            cp "$keyfile" "$LOCAL_SSH_DIR/$keyname"
+            
+            # Set proper permissions (600 for private keys, 644 for public keys)
+            if [[ "$keyname" == *.pub ]]; then
+                chmod 644 "$LOCAL_SSH_DIR/$keyname"
+            else
+                chmod 600 "$LOCAL_SSH_DIR/$keyname"
+            fi
+        fi
+    done
+fi
+
+# Handle SSH config
+if [[ -f "$DROPBOX_CONFIG" ]]; then
+    cp "$DROPBOX_CONFIG" "$LOCAL_CONFIG"
+    chmod 600 "$LOCAL_CONFIG"
+    
+    # Run SSH with the fixed config
+    exec /usr/bin/ssh -F "$LOCAL_CONFIG" "$@"
+else
+    # Fallback to regular SSH if Dropbox config doesn't exist
+    exec /usr/bin/ssh "$@"
+fi
