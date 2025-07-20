@@ -69,6 +69,7 @@ fzf                            # Command-line fuzzy finder
 htop                           # Interactive process viewer
 jq                             # Command-line JSON processor
 lf                             # Terminal file manager
+helix                          # Post-modern modal text editor
 neovim                         # Hyperextensible Vim-based text editor
 ripgrep                        # Fast recursive grep alternative
 shfmt                          # Shell script formatter
