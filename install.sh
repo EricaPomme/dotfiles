@@ -192,6 +192,7 @@ setup_dotfiles() {
     symlink_pairs="$(cat <<EOF | sed 's/^[[:space:]]*//'
         # Format: source|destination
         git/gitconfig|${HOME}/.gitconfig
+        helix|${HOME}/.config/helix
         nvim/config|${HOME}/.config/nvim
         shell/p10k.zsh|${HOME}/.p10k.zsh
         tmux/.tmux.conf.local|${HOME}/.tmux.conf.local

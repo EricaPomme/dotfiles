@@ -1,0 +1,104 @@
+theme = "onedark"
+
+[editor]
+line-number = "relative"
+mouse = true
+middle-click-paste = true
+scroll-lines = 3
+shell = ["zsh", "-c"]
+text-width = 120
+auto-completion = true
+auto-format = true
+auto-save = false
+idle-timeout = 400
+completion-trigger-len = 2
+auto-info = true
+true-color = true
+undercurl = true
+color-modes = true
+bufferline = "always"
+popup-border = "popup"
+indent-heuristic = "hybrid"
+
+[editor.statusline]
+left = ["mode", "spinner", "file-name", "total-line-numbers"]
+center = []
+right = ["diagnostics", "selections", "register", "position", "file-encoding"]
+separator = "│"
+mode.normal = "NORMAL"
+mode.insert = "INSERT"
+mode.select = "SELECT"
+
+[editor.lsp]
+enable = true
+display-messages = true
+auto-signature-help = true
+display-inlay-hints = true
+display-signature-help-docs = true
+snippets = true
+goto-reference-include-declaration = true
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.file-picker]
+hidden = false
+follow-symlinks = true
+deduplicate-links = true
+parents = true
+ignore = true
+git-ignore = true
+git-global = true
+git-exclude = true
+max-depth = 25
+
+[editor.auto-pairs]
+'(' = ')'
+'{' = '}'
+'[' = ']'
+'"' = '"'
+'`' = '`'
+'<' = '>'
+
+[editor.search]
+smart-case = true
+wrap-around = true
+
+[editor.whitespace]
+render = "all"
+characters = { space = "·", nbsp = "⍽", tab = "→", newline = "⏎", tabpad = "·" }
+
+[editor.indent-guides]
+render = true
+character = "╎"
+skip-levels = 1
+
+[editor.gutters]
+layout = ["diff", "diagnostics", "line-numbers", "spacer"]
+
+[editor.soft-wrap]
+enable = true
+
+[keys.normal]
+# Quick save
+C-s = ":w"
+# Quick quit
+C-q = ":q"
+# Format document
+C-f = ":fmt"
+# Toggle comments
+C-c = "toggle_comments"
+# Search in files
+C-S-f = ":sh rg --vimgrep"
+
+[keys.select]
+# Quick save in select mode
+C-s = ":w"
+
+[keys.insert]
+# Quick save
+C-s = ":w"
+# Escape alternative
+j = { k = "normal_mode" }
