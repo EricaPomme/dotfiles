@@ -18,7 +18,7 @@ detect_os() {
         case "$ID" in
             ubuntu|debian) OS="debian" ;;
             fedora|centos|rhel) OS="fedora" ;;
-            arch|manjaro) OS="arch" ;;
+            arch|manjaro|cachyos|endeavouros|artix) OS="arch" ;;
             *) OS="linux" ;;
         esac
     else
@@ -137,6 +137,7 @@ case "$OS" in
             "jq"
             "python-autopep8"
             "python-isort"
+            "shfmt"  # shell formatter
         )
         for package in "${pacman_packages[@]}"; do
             install_safe "$package" "sudo pacman -S --noconfirm --needed $package"
@@ -147,6 +148,17 @@ case "$OS" in
         echo "Please manually install: clangd, nodejs, npm, python3, go, rust, rust-analyzer"
         ;;
 esac
+
+# Configure npm for user installs (fix permission issues)
+if check_command "npm" && [[ ! -f "$HOME/.npmrc" || ! $(grep -q "prefix=" "$HOME/.npmrc" 2>/dev/null) ]]; then
+    echo "🔧 Configuring npm for user installs..."
+    mkdir -p "$HOME/.local/lib"
+    npm config set prefix "$HOME/.local"
+    echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> ~/.zshrc
+    export PATH="$HOME/.local/bin:$PATH"
+    echo "✅ npm configured for user installs"
+    echo
+fi
 
 # Node.js packages
 if check_command "npm"; then
@@ -191,6 +203,8 @@ if check_command "pipx" || { [[ "$OS" == "macos" ]] && { brew list pipx &>/dev/n
         # Debug Adapters
         install_safe "debugpy" "pipx install debugpy"
     fi
+else
+    echo "❌ pipx is not installed. Please install it first."
 fi
 
 # Go packages
@@ -203,6 +217,8 @@ if check_command "go"; then
     install_safe "gci" "go install github.com/daixiang0/gci@latest"
     # Debug Adapters
     install_safe "delve (dlv)" "go install github.com/go-delve/delve/cmd/dlv@latest"
+else
+    echo "❌ go is not installed. Please install it first."
 fi
 
 # Rust packages
@@ -214,6 +230,7 @@ if check_command "cargo"; then
     if check_command "nix"; then
         install_safe "nil (Nix LSP)" "cargo install --git https://github.com/oxalica/nil nil"
     else
+        echo "❌ nix is not installed. Please install it first."
         echo "🦀 Skipping nil (Nix LSP) - requires nix to build"
     fi
     # Formatters
@@ -275,3 +292,5 @@ echo "🎉 Language servers, formatters, and debug adapters installation complet
 echo
 echo "💡 Run 'hx --health' to check which language servers are working"
 echo "🔗 Link configs: ln -sf ~/dotfiles/helix/* ~/.config/helix/"
+echo
+echo "Note: You may need to restart your terminal or run 'source ~/.zshrc' to update your PATH."
