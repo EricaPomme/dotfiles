@@ -49,6 +49,8 @@ source "$HOME/dotfiles/shell/alias_dots.zsh"
 # tar with exclusion
 source "$HOME/dotfiles/shell/alias_tar.zsh"
 
+source "$HOME/dotfiles/shell/alias_helix.zsh"
+
 # distro package shortcuts
 source "$HOME/dotfiles/util.sh"
 detect_os
