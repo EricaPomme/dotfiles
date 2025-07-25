@@ -178,9 +178,9 @@ if check_command "npm"; then
         "@fsouza/prettierd"  # faster prettier daemon
         "eslint"
         "@typescript-eslint/eslint-plugin"
-        # Debug Adapters
-        # Note: vscode-js-debug is not available on npm, use VS Code extension instead
-        "node-debug2"
+        # Debug Adapters  
+        # Note: node-debug2 is deprecated, using newer alternatives
+        # For JavaScript debugging, install via VS Code extension or use built-in debuggers
     )
     
     for package in "${npm_packages[@]}"; do
@@ -194,7 +194,7 @@ if check_command "pipx" || { [[ "$OS" == "macos" ]] && { brew list pipx &>/dev/n
     if check_command "pipx"; then
         # Language Servers
         install_safe "Python LSP Server" "pipx install 'python-lsp-server[all]'"
-        install_safe "Ruff LSP" "pipx install ruff-lsp"
+        install_safe "Ruff" "pipx install ruff"  # Modern Python linter/formatter (replaces ruff-lsp)
         # Formatters
         install_safe "Black formatter" "pipx install black"
         install_safe "Isort" "pipx install isort"
