@@ -240,7 +240,13 @@ if check_command "cargo"; then
     install_safe "stylua (Lua formatter)" "cargo install stylua"
     install_safe "taplo (TOML formatter)" "cargo install taplo-cli --locked"
     # Debug Adapters
-    install_safe "codelldb" "cargo install --git https://github.com/vadimcn/codelldb.git codelldb"
+    # Set LLDB environment for codelldb on macOS
+    if [[ "$OS" == "macos" ]] && brew list llvm &>/dev/null; then
+        LLVM_PREFIX=$(brew --prefix llvm)
+        install_safe "codelldb" "LLDB_INCLUDE='$LLVM_PREFIX/include' LLDB_LIBRARY_DIR='$LLVM_PREFIX/lib' LLDB_DYLIB='$LLVM_PREFIX/lib/liblldb.dylib' cargo install --git https://github.com/vadimcn/codelldb.git codelldb"
+    else
+        install_safe "codelldb" "cargo install --git https://github.com/vadimcn/codelldb.git codelldb"
+    fi
 fi
 
 # Ruby packages (skip - system Ruby 2.6 too old for modern gems)
