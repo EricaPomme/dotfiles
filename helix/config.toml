@@ -1,7 +1,7 @@
-theme = "onedark"
+theme = "dark_plus"
 
 [editor]
-line-number = "relative"
+line-number = "absolute"
 mouse = true
 middle-click-paste = true
 scroll-lines = 3
@@ -61,6 +61,7 @@ max-depth = 25
 '"' = '"'
 '`' = '`'
 '<' = '>'
+"'" = "'"
 
 [editor.search]
 smart-case = true
@@ -84,6 +85,7 @@ enable = true
 [keys.normal]
 # Quick save
 C-s = ":w"
+Cmd-s = ":w"
 # Quick quit
 C-q = ":q"
 # Format document
@@ -93,6 +95,10 @@ C-c = "toggle_comments"
 # Search in files
 C-S-f = ":sh rg --vimgrep"
 
+[keys.normal.space]
+# Set Language
+"L" = "@:set-language "
+
 [keys.select]
 # Quick save in select mode
 C-s = ":w"
@@ -100,5 +106,3 @@ C-s = ":w"
 [keys.insert]
 # Quick save
 C-s = ":w"
-# Escape alternative
-j = { k = "normal_mode" }
