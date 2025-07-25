@@ -171,7 +171,7 @@ if check_command "npm"; then
         "typescript-language-server"
         "yaml-language-server"
         "@ansible/ansible-language-server"
-        "graphql-language-service-cli"
+        "graphql-language-service-server"  # Modern GraphQL LSP (replaces deprecated -cli)
         "@tailwindcss/language-server"
         # Formatters
         "prettier"
@@ -276,10 +276,11 @@ if check_command "cargo"; then
     install_safe "leptosfmt" "cargo install leptosfmt"
 fi
 
-# Install Java formatters if they're available
-if check_command "npm"; then
-    install_safe "google-java-format" "npm install -g google-java-format"
-fi
+# Note: Java formatters like google-java-format are better installed via:
+# - Homebrew: brew install google-java-format  
+# - Direct download from releases
+# - IDE plugins
+# Skipping npm wrapper to avoid deprecated dependencies
 
 # Fix prettier conflict if it exists (macOS specific)
 if [[ "$OS" == "macos" ]] && brew list prettier &>/dev/null && [[ -L "/opt/homebrew/bin/prettier" ]]; then
