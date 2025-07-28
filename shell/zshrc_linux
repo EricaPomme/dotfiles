@@ -114,3 +114,4 @@ elif command -v neofetch &>/dev/null; then
     clear
     neofetch
 fi
+export PATH="$HOME/.local/bin:$PATH"
