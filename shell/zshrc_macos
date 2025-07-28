@@ -86,3 +86,8 @@ fi
 if [[ -f ~/.p10k.zsh ]] && [[ "$LOADED_EXTRAS" =~ "/.zprezto/init.zsh" ]]; then
   source ~/.p10k.zsh
 fi
+
+# -----------------------------------------------------------------------------
+# Source .local version if it exists
+# -----------------------------------------------------------------------------
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"

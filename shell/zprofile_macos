@@ -44,3 +44,8 @@ if command -v code >/dev/null 2>&1; then
 else
     export VISUAL="$EDITOR"
 fi
+
+# -----------------------------------------------------------------------------
+# 4) Source .local version if it exists
+# -----------------------------------------------------------------------------
+[[ -f "$HOME/.zprofile.local" ]] && source "$HOME/.zprofile.local"

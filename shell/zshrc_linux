@@ -115,3 +115,9 @@ elif command -v neofetch &>/dev/null; then
     neofetch
 fi
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+
+# -----------------------------------------------------------------------------
+# 7) Source .local version if it exists
+# -----------------------------------------------------------------------------
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
