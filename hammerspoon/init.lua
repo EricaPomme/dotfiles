@@ -41,12 +41,44 @@ function launcher(mode, mods, key, app)
     end)
 end
 
-function text(mode, mods, key, str)
+-------------------------------------------------------------------------------
+-- Keystroke helper: supports optional exit or repeat
+-- usage: keystroke(mode, mods, inputKey, outputMods, outputKey, exitOnPress)
+--   exitOnPress: boolean (default=true) – if false, modal stays active
+function keystroke(mode, mods, inputKey, outputMods, outputKey, exitOnPress)
+    exitOnPress = (exitOnPress == nil) and true or exitOnPress
+    local m = ({ f13 = f13Mode, f14 = f14Mode, f15 = f15Mode })[mode]
+    if not m then return end
+
+    -- pressedFn
+    local function handlePress()
+        hs.eventtap.keyStroke(outputMods, outputKey)
+        modalActive[mode] = true
+        if exitOnPress then m:exit() end
+    end
+
+    -- repeatFn (only called if the key is held)
+    local function handleRepeat()
+        if not exitOnPress then
+            hs.eventtap.keyStroke(outputMods, outputKey)
+        end
+    end
+
+    -- bind with pressed, no release, and repeat
+    m:bind(mods, inputKey, handlePress, nil, handleRepeat)
+end
+
+-- Text‑insertion macros (static or dynamic)
+-- usage: textMacro(mode, mods, key, content)
+--   content: either a string or a function that returns a string
+function textMacro(mode, mods, key, content)
     local m = ({f13 = f13Mode, f14 = f14Mode, f15 = f15Mode})[mode]
     if not m then return end
+
     m:bind(mods, key, function()
         local original = hs.pasteboard.getContents()
-        hs.pasteboard.setContents(str)
+        local toPaste = (type(content) == "function" and content()) or content
+        hs.pasteboard.setContents(toPaste)
         hs.eventtap.keyStroke({"cmd"}, "v")
         hs.timer.doAfter(0.1, function()
             hs.pasteboard.setContents(original)
@@ -124,61 +156,30 @@ f13Mode:bind({}, 'e', function()
 end)
 
 -------------------------------------------------------------------------------
+-- Key Remaps
+keystroke("f13", {}, "left",  {}, "home", false)
+keystroke("f13", {}, "right", {}, "end", false)
+keystroke("f13", {}, "up",    {}, "pageup", false)
+keystroke("f13", {}, "down",  {}, "pagedown", false)
+
+-------------------------------------------------------------------------------
 -- Text Macros
-
--- Signature
-f14Mode:bind({}, "s", function()
-    local original = hs.pasteboard.getContents()
-    hs.pasteboard.setContents("--EY:" .. os.date("%Y-%m-%d"))
-    hs.eventtap.keyStroke({"cmd"}, "v")
-    hs.timer.doAfter(0.1, function()
-        hs.pasteboard.setContents(original)
-    end)
-    modalActive.f14 = true
-    f14Mode:exit()
+textMacro("f14", {}, "s", function()
+    return "--EY:" .. os.date("%Y-%m-%d")
 end)
-
--- Datestamp
-f14Mode:bind({}, "d", function()
-    local original = hs.pasteboard.getContents()
-    hs.pasteboard.setContents(os.date("%Y-%m-%d"))
-    hs.eventtap.keyStroke({"cmd"}, "v")
-    hs.timer.doAfter(0.1, function()
-        hs.pasteboard.setContents(original)
-    end)
-    modalActive.f14 = true
-    f14Mode:exit()
+textMacro("f14", {}, "d", function()
+    return os.date("%Y-%m-%d")
 end)
-
--- Timestamp (12-hour format)
-f14Mode:bind({}, "t", function()
-    local original = hs.pasteboard.getContents()
-    hs.pasteboard.setContents(os.date("%Y-%m-%d %I:%M:%S %p"))
-    hs.eventtap.keyStroke({"cmd"}, "v")
-    hs.timer.doAfter(0.1, function()
-        hs.pasteboard.setContents(original)
-    end)
-    modalActive.f14 = true
-    f14Mode:exit()
+textMacro("f14", {}, "t", function()
+    return os.date("%Y-%m-%d %I:%M:%S %p")
 end)
-
--- ISO8601 Timestamp
-f14Mode:bind({}, "i", function()
-    local original = hs.pasteboard.getContents()
-    hs.pasteboard.setContents(os.date("%Y-%m-%dT%H:%M:%SZ"))
-    hs.eventtap.keyStroke({"cmd"}, "v")
-    hs.timer.doAfter(0.1, function()
-        hs.pasteboard.setContents(original)
-    end)
-    modalActive.f14 = true
-    f14Mode:exit()
+textMacro("f14", {}, "i", function()
+    return os.date("%Y-%m-%dT%H:%M:%SZ")
 end)
 
 -------------------------------------------------------------------------------
 -- URL Cleaner
 local urlHandlers = {
-
-    -- Socials
     {
         name = "Bluesky",
         match = function(url) return url:match("bsky%.app") end,
@@ -189,7 +190,8 @@ local urlHandlers = {
     {
         name = "Twitter/X",
         match = function(url)
-            return url:match("^https?://[www%.]*x%.com") or url:match("^https?://[www%.]*twitter%.com")
+            return url:match("^https?://[www%.]*x%.com")
+                or url:match("^https?://[www%.]*twitter%.com")
         end,
         transform = function(url)
             return url:gsub("^https?://[www%.]*[xtwitter]+%.com/(.*)$", "https://fxtwitter.com/%1")
@@ -203,26 +205,21 @@ local urlHandlers = {
             return videoId and ("https://youtu.be/" .. videoId) or url
         end
     },
-
-    -- Shopping
     {
-    name = "Amazon",
-    match = function(url)
-        return url:match("^https?://[www%.]*amazon%.([%w%.]+)")
-    end,
-    transform = function(url)
-        -- catch both /dp/ASIN and /gp/product/ASIN
-        local pid = url:match("/dp/([A-Z0-9]+)") 
-                    or url:match("/gp/product/([A-Z0-9]+)")
-        local domain = url:match("^https?://[www%.]*amazon%.([%w%.]+)") or "com"
-        if pid then
-        return string.format("https://amazon.%s/dp/%s", domain, pid)
+        name = "Amazon",
+        match = function(url)
+            return url:match("^https?://[www%.]*amazon%.([%w%.]+)")
+        end,
+        transform = function(url)
+            local pid = url:match("/dp/([A-Z0-9]+)")
+                        or url:match("/gp/product/([A-Z0-9]+)")
+            local domain = url:match("^https?://[www%.]*amazon%.([%w%.]+)") or "com"
+            if pid then
+                return string.format("https://amazon.%s/dp/%s", domain, pid)
+            end
+            return url:gsub("%?.*$", ""):gsub("/+$", "")
         end
-        -- as a last resort, strip query strings and trailing slashes
-        return url:gsub("%?.*$", ""):gsub("/+$", "")
-    end
     },
-
     -- Filthy degeneracy
     {
         name = "e621",
@@ -243,22 +240,18 @@ f13Mode:bind({}, 'v', function()
     local original = clipboard
     local cleanUrl, modified
 
-    -- Validate clipboard is a URL
     if not clipboard or not clipboard:match("^https?://") then
         hs.alert.show("Clipboard doesn't contain a valid URL")
         f13Mode:exit()
         return
     end
 
-    -- Apply the first matching handler
     for _, handler in ipairs(urlHandlers) do
         if handler.match(clipboard) then
             cleanUrl = handler.transform(clipboard)
             break
         end
     end
-
-    -- Fallback: strip query params and trailing slashes
     cleanUrl = cleanUrl or clipboard:gsub("%?.*$", ""):gsub("/+$", "")
 
     if cleanUrl ~= original then
@@ -266,7 +259,6 @@ f13Mode:bind({}, 'v', function()
         modified = true
     end
 
-    -- Paste result if modified
     if modified then
         hs.timer.doAfter(0.1, function()
             local app = hs.application.frontmostApplication()

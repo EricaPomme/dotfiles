@@ -1,7 +1,3 @@
-# ~/.editorconfig
-# Global EditorConfig settings for consistent style across macOS, Linux, and Windows
-# Applies to all supported editors (VS Code, PyCharm, Sublime, etc.)
-
 root = true
 
 # ----------------------------------------
@@ -73,5 +69,3 @@ indent_size = 2
 # ----------------------------------------
 [Makefile]
 indent_style = tab
-
-
