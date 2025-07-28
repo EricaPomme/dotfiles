@@ -67,38 +67,38 @@ install_packages() {
             log_debug "installing Linux packages"
             detect_linux_distro
             case "$(distro_family)" in
-                debian)
-                    if check_packagelist "packagelists/deb.packages"; then
-                        check_command apt
-                        log_info "Installing APT packages..."
-                        sudo apt-get update
-                        read_packagelist "packagelists/deb.packages" | xargs sudo apt-get install -y || log_warning "Some apt installs may have failed"
-                    fi
-                    ;;
-                fedora)
-                    if check_packagelist "packagelists/fedora.packages"; then
-                        check_command dnf
-                        log_info "Installing DNF packages..."
-                        read_packagelist "packagelists/fedora.packages" | xargs sudo dnf install -y || log_warning "Some dnf installs may have failed"
-                    fi
-                    ;;
-                arch)
-                    if check_packagelist "packagelists/pacman.packages"; then
-                        check_command pacman
-                        log_info "Installing Pacman packages..."
-                        read_packagelist "packagelists/pacman.packages" | xargs -r sudo pacman -S --noconfirm --needed || log_warning "Some pacman installs may have failed"
-                    fi
-                    ;;
-                nixos)
-                    if check_packagelist "packagelists/nix.packages"; then
-                        check_command nix-env
-                        log_info "Installing Nix packages..."
-                        read_packagelist "packagelists/nix.packages" | xargs nix-env -iA nixos || log_warning "Some nix installs may have failed"
-                    fi
-                    ;;
-                *)
-                    log_warning "Unsupported Linux distribution: $DISTRO_ID"
-                    ;;
+            debian)
+                if check_packagelist "packagelists/deb.packages"; then
+                    check_command apt
+                    log_info "Installing APT packages..."
+                    sudo apt-get update
+                    read_packagelist "packagelists/deb.packages" | xargs sudo apt-get install -y || log_warning "Some apt installs may have failed"
+                fi
+                ;;
+            fedora)
+                if check_packagelist "packagelists/fedora.packages"; then
+                    check_command dnf
+                    log_info "Installing DNF packages..."
+                    read_packagelist "packagelists/fedora.packages" | xargs sudo dnf install -y || log_warning "Some dnf installs may have failed"
+                fi
+                ;;
+            arch)
+                if check_packagelist "packagelists/pacman.packages"; then
+                    check_command pacman
+                    log_info "Installing Pacman packages..."
+                    read_packagelist "packagelists/pacman.packages" | xargs -r sudo pacman -S --noconfirm --needed || log_warning "Some pacman installs may have failed"
+                fi
+                ;;
+            nixos)
+                if check_packagelist "packagelists/nix.packages"; then
+                    check_command nix-env
+                    log_info "Installing Nix packages..."
+                    read_packagelist "packagelists/nix.packages" | xargs nix-env -iA nixos || log_warning "Some nix installs may have failed"
+                fi
+                ;;
+            *)
+                log_warning "Unsupported Linux distribution: $DISTRO_ID"
+                ;;
             esac
 
             if command -v flatpak &>/dev/null && check_packagelist "packagelists/flatpak.packages"; then
@@ -161,6 +161,7 @@ setup_dotfiles() {
 
     # Create symlink pairs - improved error handling
     {
+        echo "editorconfig|${HOME}/.editorconfig"
         echo "git/gitconfig|${HOME}/.gitconfig"
         echo "helix|${HOME}/.config/helix"
         echo "nvim/config|${HOME}/.config/nvim"
@@ -223,26 +224,26 @@ setup_dotfiles() {
 
 verify_essentials() {
     log_debug "entering verify_essentials($(join_args "$@"))"
-    
+
     # Always check these core tools
     check_command git
     check_command zsh
     check_command curl
-    
+
     # Only check optional tools if they'll be used
-    if ! $BYPASS_CARGO && ( check_packagelist "packagelists/cargo.packages" 2>/dev/null ); then
+    if ! $BYPASS_CARGO && (check_packagelist "packagelists/cargo.packages" 2>/dev/null); then
         check_command cargo
     fi
-    
-    if ! $BYPASS_NPM && ( check_packagelist "packagelists/npm.packages" 2>/dev/null ); then
+
+    if ! $BYPASS_NPM && (check_packagelist "packagelists/npm.packages" 2>/dev/null); then
         check_command npm
     fi
-    
+
     # OS-specific checks
     if [ "$OS" = "macos" ] && ! $BYPASS_OS_PACKAGES; then
         check_command brew
     fi
-    
+
     if [ "$OS" = "linux" ] && ! $BYPASS_OS_PACKAGES; then
         # Only check flatpak if we have flatpak packages to install
         if check_packagelist "packagelists/flatpak.packages" 2>/dev/null; then
@@ -336,8 +337,8 @@ set_macos_defaults() {
 
     ### Refresh UI ###
     log_debug "Restarting Finder and Dock to apply changes"
-    killall Finder > /dev/null 2>&1 || log_warning "Finder was not running"
-    killall Dock > /dev/null 2>&1 || log_warning "Dock was not running"
+    killall Finder >/dev/null 2>&1 || log_warning "Finder was not running"
+    killall Dock >/dev/null 2>&1 || log_warning "Dock was not running"
 
     log_debug "exiting set_macos_defaults($(join_args "$@"))"
     return 0

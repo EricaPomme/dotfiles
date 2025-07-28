@@ -1,0 +1,77 @@
+# ~/.editorconfig
+# Global EditorConfig settings for consistent style across macOS, Linux, and Windows
+# Applies to all supported editors (VS Code, PyCharm, Sublime, etc.)
+
+root = true
+
+# ----------------------------------------
+# Defaults for all files
+# ----------------------------------------
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# ----------------------------------------
+# Python files
+# ----------------------------------------
+[*.py]
+indent_style = space
+indent_size = 4
+# Optional, but if your editor supports it:
+max_line_length = 120
+
+# ----------------------------------------
+# PowerShell scripts
+# ----------------------------------------
+[*.ps1]
+indent_style = space
+indent_size = 4
+end_of_line = crlf  # PowerShell on Windows often expects CRLF
+charset = utf-8
+
+# ----------------------------------------
+# Bash / Shell scripts
+# ----------------------------------------
+[*.sh]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+
+# ----------------------------------------
+# Batch / CMD scripts (Windows)
+# ----------------------------------------
+[*.{bat,cmd}]
+end_of_line = crlf
+charset = utf-8
+indent_style = space
+indent_size = 4
+
+# ----------------------------------------
+# Markdown / Text / Config
+# ----------------------------------------
+[*.{md,txt,conf,ini,yml,yaml}]
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = false  # Needed for Markdown formatting
+indent_style = space
+indent_size = 2
+
+# ----------------------------------------
+# JSON and JSON-style configs
+# ----------------------------------------
+[*.{json,jsonc}]
+indent_style = space
+indent_size = 2
+
+# ----------------------------------------
+# Makefiles: tabs are required!
+# ----------------------------------------
+[Makefile]
+indent_style = tab
+
+
