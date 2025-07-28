@@ -7,6 +7,18 @@ DEBUG=${DEBUG:-false}
 # Load shared logging and utility functions
 source "$(dirname "$0")/util.sh"
 
+# Initialize bypass flags from util.sh defaults
+source_bypass_defaults() {
+    : "${BYPASS_VERIFY_ESSENTIALS:=false}"
+    : "${BYPASS_GIT_REPOS:=false}"
+    : "${BYPASS_OS_PACKAGES:=false}"
+    : "${BYPASS_CARGO:=false}"
+    : "${BYPASS_NPM:=false}"
+    : "${BYPASS_SETUP_DOTFILES:=false}"
+    : "${BYPASS_MACOS_DEFAULTS:=false}"
+    : "${BYPASS_OS_UPDATES:=false}"
+}
+
 # Pull updates for any git-based tools installed by install.sh
 update_git_repos() {
   log_debug "entering update_git_repos($(join_args "$@"))"
@@ -30,9 +42,33 @@ update_git_repos() {
   log_debug "exiting update_git_repos($(join_args "$@"))"
 }
 
+# Check if cargo-update is installed and install if needed
+ensure_cargo_update() {
+  log_debug "entering ensure_cargo_update($(join_args "$@"))"
+  
+  if ! command -v cargo &>/dev/null; then
+    log_warning "Cargo not available, skipping cargo-update check"
+    return 1
+  fi
+  
+  if ! cargo install --list | grep -q "^cargo-update v"; then
+    log_info "Installing cargo-update..."
+    cargo install cargo-update || {
+      log_warning "Failed to install cargo-update"
+      return 1
+    }
+  fi
+  
+  log_debug "exiting ensure_cargo_update($(join_args "$@"))"
+  return 0
+}
+
 function update_all() {
   log_debug "entering update_all($(join_args "$@"))"
 
+  # Initialize bypass flags first
+  source_bypass_defaults
+  
   detect_os
 
   if ! $BYPASS_OS_UPDATES; then
@@ -75,13 +111,19 @@ function update_all() {
           fi
           ;;
       esac
+
+      # Update Flatpak if available
+      if command -v flatpak &>/dev/null; then
+        log_info "Updating Flatpak packages..."
+        flatpak update -y || log_warning "Flatpak update failed"
+      fi
     fi
   else
     log_info "BYPASS_OS_UPDATES is true, skipping OS package updates"
   fi
 
   # Update cargo packages
-  if ! $BYPASS_CARGO && command -v cargo &>/dev/null; then
+  if ! $BYPASS_CARGO && ensure_cargo_update; then
     log_info "Updating Cargo packages..."
     cargo install-update -a || log_warning "Cargo update failed"
   elif $BYPASS_CARGO; then

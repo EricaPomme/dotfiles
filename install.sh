@@ -4,21 +4,21 @@ set -eu
 
 DEBUG=${DEBUG:-false}
 
-
 # Load common helpers
 source "$(dirname "$0")/util.sh"
 
+# Initialize bypass flags from util.sh defaults
+source_bypass_defaults() {
+    : "${BYPASS_VERIFY_ESSENTIALS:=false}"
+    : "${BYPASS_GIT_REPOS:=false}"
+    : "${BYPASS_OS_PACKAGES:=false}"
+    : "${BYPASS_CARGO:=false}"
+    : "${BYPASS_NPM:=false}"
+    : "${BYPASS_SETUP_DOTFILES:=false}"
+    : "${BYPASS_MACOS_DEFAULTS:=false}"
+}
+
 # Check if a command is available in the system's PATH
-#
-# This function verifies if a specified command exists and is executable.
-# If the command is not found, it logs a critical error and exits the script.
-#
-# Arguments:
-#   $1 - The command name to check for availability
-#
-# Returns:
-#   0 - If the command exists and is executable
-#   Does not return if command is not found (exits with error)
 check_command() {
     log_debug "entering check_command($(join_args "$@"))"
     if ! command -v "$1" &>/dev/null; then
@@ -27,18 +27,19 @@ check_command() {
     log_debug "exiting check_command($(join_args "$@"))"
 }
 
+# Check if a package list file exists
+check_packagelist() {
+    log_debug "entering check_packagelist($(join_args "$@"))"
+    if [ ! -f "$1" ]; then
+        log_warning "Package list file '$1' not found, skipping"
+        log_debug "exiting check_packagelist($(join_args "$@")) - file not found"
+        return 1
+    fi
+    log_debug "exiting check_packagelist($(join_args "$@")) - file exists"
+    return 0
+}
+
 # Reads and processes a package list file
-#
-# This function reads a package list file, filters out commented lines
-# (those starting with #), and returns only the first column of each line.
-# This is useful for extracting clean package names from configuration files
-# that may contain comments or additional metadata.
-#
-# Arguments:
-#   $1 - Path to the package list file to be processed
-#
-# Returns:
-#   Outputs a list of package names (one per line) to stdout
 read_packagelist() {
     log_debug "entering read_packagelist($(join_args "$@"))"
     grep -vE '^\s*#' "$1" | awk '{print $1}'
@@ -46,31 +47,18 @@ read_packagelist() {
 }
 
 # Installs packages from predefined package lists based on the detected OS
-#
-# This function handles package installation across different operating systems
-# and package managers. It first installs OS-specific packages (Homebrew for macOS,
-# apt/dnf for Linux distributions), then proceeds to install platform-agnostic
-# packages (Cargo, NPM). The function reads package names from predefined files
-# in the packagelists directory and installs them using the appropriate package manager.
-#
-# Arguments:
-#   None - Uses global variables OS and DISTRO_ID set by detect_os and detect_linux_distro
-#
-# Returns:
-#   0 - On successful execution (even if some package installations fail)
-#   Package installation failures are logged as warnings but don't cause the function to exit
 install_packages() {
     log_debug "entering install_packages($(join_args "$@"))"
 
     if ! $BYPASS_OS_PACKAGES; then
         if [ "$OS" = "macos" ]; then
             log_debug "installing macOS packages"
-            if [ -f "packagelists/homebrew.packages" ]; then
+            if check_packagelist "packagelists/homebrew.packages"; then
                 check_command brew
                 log_info "Installing Homebrew packages..."
                 read_packagelist "packagelists/homebrew.packages" | xargs brew install || log_warning "Some brew installs may have failed"
             fi
-            if [ -f "packagelists/homebrew.casks" ]; then
+            if check_packagelist "packagelists/homebrew.casks"; then
                 check_command brew
                 log_info "Installing Homebrew casks..."
                 read_packagelist "packagelists/homebrew.casks" | xargs brew install --cask || log_warning "Some cask installs may have failed"
@@ -80,7 +68,7 @@ install_packages() {
             detect_linux_distro
             case "$(distro_family)" in
                 debian)
-                    if [ -f "packagelists/deb.packages" ]; then
+                    if check_packagelist "packagelists/deb.packages"; then
                         check_command apt
                         log_info "Installing APT packages..."
                         sudo apt-get update
@@ -88,21 +76,21 @@ install_packages() {
                     fi
                     ;;
                 fedora)
-                    if [ -f "packagelists/fedora.packages" ]; then
+                    if check_packagelist "packagelists/fedora.packages"; then
                         check_command dnf
                         log_info "Installing DNF packages..."
                         read_packagelist "packagelists/fedora.packages" | xargs sudo dnf install -y || log_warning "Some dnf installs may have failed"
                     fi
                     ;;
                 arch)
-                    if [ -f "packagelists/pacman.packages" ]; then
+                    if check_packagelist "packagelists/pacman.packages"; then
                         check_command pacman
                         log_info "Installing Pacman packages..."
                         read_packagelist "packagelists/pacman.packages" | xargs -r sudo pacman -S --noconfirm --needed || log_warning "Some pacman installs may have failed"
                     fi
                     ;;
                 nixos)
-                    if [ -f "packagelists/nix.packages" ]; then
+                    if check_packagelist "packagelists/nix.packages"; then
                         check_command nix-env
                         log_info "Installing Nix packages..."
                         read_packagelist "packagelists/nix.packages" | xargs nix-env -iA nixos || log_warning "Some nix installs may have failed"
@@ -113,7 +101,7 @@ install_packages() {
                     ;;
             esac
 
-            if command -v flatpak &>/dev/null && [ -f "packagelists/flatpak.packages" ]; then
+            if command -v flatpak &>/dev/null && check_packagelist "packagelists/flatpak.packages"; then
                 log_info "Installing Flatpak packages..."
                 read_packagelist "packagelists/flatpak.packages" | xargs -I{} flatpak install -y --noninteractive flathub {} || log_warning "Some flatpak installs may have failed"
             fi
@@ -123,7 +111,7 @@ install_packages() {
     fi
 
     log_debug "installing platform-agnostic packages"
-    if ! $BYPASS_CARGO && [ -f "packagelists/cargo.packages" ]; then
+    if ! $BYPASS_CARGO && check_packagelist "packagelists/cargo.packages"; then
         check_command cargo
         log_info "Installing Cargo packages..."
         read_packagelist "packagelists/cargo.packages" | xargs cargo install || log_warning "Some cargo installs may have failed"
@@ -131,7 +119,7 @@ install_packages() {
         log_info "BYPASS_CARGO is true, skipping Cargo packages"
     fi
 
-    if ! $BYPASS_NPM && [ -f "packagelists/npm.packages" ]; then
+    if ! $BYPASS_NPM && check_packagelist "packagelists/npm.packages"; then
         check_command npm
         log_info "Installing NPM global packages..."
         read_packagelist "packagelists/npm.packages" | xargs npm install -g || log_warning "Some npm installs may have failed"
@@ -142,23 +130,6 @@ install_packages() {
     log_debug "exiting install_packages($(join_args "$@"))"
 }
 
-# Sets up dotfiles by creating symbolic links and configuring SSH
-#
-# This function creates symbolic links from the dotfiles repository to the
-# appropriate locations in the user's home directory. It handles configuration
-# files for tmux, zsh, and Hammerspoon. Additionally, it sets up
-# an SSH config file if one doesn't already exist.
-#
-# The function checks if symlinks already exist and are correctly set before
-# creating new ones, avoiding unnecessary operations. For the SSH config,
-# it will not overwrite an existing file to preserve user customizations.
-#
-# Arguments:
-#   None - Uses the current working directory as the source for dotfiles
-#
-# Returns:
-#   0 - On successful execution
-#   All operations are logged with appropriate info messages
 setup_dotfiles() {
     log_debug "entering setup_dotfiles($(join_args "$@"))"
 
@@ -172,7 +143,6 @@ setup_dotfiles() {
         log_warning "PWD was not defined, using current directory: $PWD"
     fi
 
-    # Use a fully POSIX-compliant approach with newline-separated pairs
     # OS-specific zshrc selection and symlink configuration
     if [ "$OS" = "macos" ]; then
         ZSHRC_SOURCE="shell/zshrc_macos"
@@ -189,21 +159,19 @@ setup_dotfiles() {
         OS_SPECIFIC_SYMLINKS=""
     fi
 
-    symlink_pairs="$(cat <<EOF | sed 's/^[[:space:]]*//'
-        # Format: source|destination
-        git/gitconfig|${HOME}/.gitconfig
-        helix|${HOME}/.config/helix
-        nvim/config|${HOME}/.config/nvim
-        shell/p10k.zsh|${HOME}/.p10k.zsh
-        tmux/.tmux.conf.local|${HOME}/.tmux.conf.local
-        
-        ${OS_SPECIFIC_SYMLINKS}
-        ${ZPROFILE_SOURCE}|${HOME}/.zprofile
-        ${ZSHRC_SOURCE}|${HOME}/.zshrc
-EOF
-)"
-
-    echo "${symlink_pairs}" | grep -v "^#" | grep -v "^$" | while IFS="|" read -r src dst; do
+    # Create symlink pairs - improved error handling
+    {
+        echo "git/gitconfig|${HOME}/.gitconfig"
+        echo "helix|${HOME}/.config/helix"
+        echo "nvim/config|${HOME}/.config/nvim"
+        echo "shell/p10k.zsh|${HOME}/.p10k.zsh"
+        echo "tmux/.tmux.conf.local|${HOME}/.tmux.conf.local"
+        if [ -n "$OS_SPECIFIC_SYMLINKS" ]; then
+            echo "$OS_SPECIFIC_SYMLINKS"
+        fi
+        echo "${ZPROFILE_SOURCE}|${HOME}/.zprofile"
+        echo "${ZSHRC_SOURCE}|${HOME}/.zshrc"
+    } | while IFS="|" read -r src dst; do
         # Skip empty lines
         [ -z "$src" ] && continue
 
@@ -222,7 +190,7 @@ EOF
         else
             # Backup existing file if it's not a symlink
             if [ -e "$dst" ] && [ ! -L "$dst" ]; then
-                local backup_file="${dst}.backup.$(date +%Y%m%d%H%M%S)"
+                backup_file="${dst}.backup.$(date +%Y%m%d%H%M%S)"
                 log_info "Backing up existing file '$dst' to '$backup_file'"
                 mv "$dst" "$backup_file"
             fi
@@ -239,9 +207,13 @@ EOF
     # SSH config
     mkdir -p "$HOME/.ssh"
     if [ ! -f "$HOME/.ssh/config" ]; then
-        cp ssh/config_template "$HOME/.ssh/config"
-        chmod 600 "$HOME/.ssh/config"
-        log_info "SSH config placeholder copied"
+        if [ -f "ssh/config_template" ]; then
+            cp ssh/config_template "$HOME/.ssh/config"
+            chmod 600 "$HOME/.ssh/config"
+            log_info "SSH config placeholder copied"
+        else
+            log_warning "SSH config template not found at ssh/config_template"
+        fi
     else
         log_info "SSH config already exists at '$HOME/.ssh/config', not overwriting"
     fi
@@ -249,32 +221,36 @@ EOF
     log_debug "exiting setup_dotfiles($(join_args "$@"))"
 }
 
-# Verifies and sets up essential tools for the environment
-#
-# This function checks for the presence of required commands (git, zsh, curl)
-# and ensures that zsh is set as the default shell for the current user.
-# If zsh is not the default shell, it adds the zsh path to /etc/shells if needed
-# and attempts to change the user's default shell to zsh.
-#
-# Arguments:
-#   None
-#
-# Returns:
-#   0 - On successful execution
-#   Failures in changing the default shell are logged as warnings but don't cause the function to exit
 verify_essentials() {
     log_debug "entering verify_essentials($(join_args "$@"))"
+    
+    # Always check these core tools
     check_command git
     check_command zsh
     check_command curl
-    if ! $BYPASS_CARGO; then
+    
+    # Only check optional tools if they'll be used
+    if ! $BYPASS_CARGO && ( check_packagelist "packagelists/cargo.packages" 2>/dev/null ); then
         check_command cargo
     fi
-    [ "$OS" = "macos" ] && check_command brew
+    
+    if ! $BYPASS_NPM && ( check_packagelist "packagelists/npm.packages" 2>/dev/null ); then
+        check_command npm
+    fi
+    
+    # OS-specific checks
+    if [ "$OS" = "macos" ] && ! $BYPASS_OS_PACKAGES; then
+        check_command brew
+    fi
+    
     if [ "$OS" = "linux" ] && ! $BYPASS_OS_PACKAGES; then
-        check_command flatpak
+        # Only check flatpak if we have flatpak packages to install
+        if check_packagelist "packagelists/flatpak.packages" 2>/dev/null; then
+            check_command flatpak
+        fi
     fi
 
+    # Set up zsh as default shell
     ZSH_PATH=$(command -v zsh)
     if [ "$SHELL" != "$ZSH_PATH" ]; then
         if ! grep -q "$ZSH_PATH" /etc/shells; then
@@ -287,11 +263,6 @@ verify_essentials() {
     log_debug "exiting verify_essentials($(join_args "$@"))"
 }
 
-# Clones git-based tools like Prezto and oh-my-tmux
-#
-# This function checks if each repository has already been installed in the
-# user's home directory. If not, it clones the repository and performs any
-# required setup. Progress is reported using the standard logging helpers.
 install_git_repos() {
     log_debug "entering install_git_repos($(join_args "$@"))"
 
@@ -330,19 +301,6 @@ install_git_repos() {
     log_debug "exiting install_git_repos($(join_args "$@"))"
 }
 
-# Configures macOS system defaults for improved usability
-#
-# This function applies a series of macOS-specific system preferences and UI settings
-# to enhance the user experience and restarts the necessary system processes to apply
-# these changes.
-#
-# Arguments:
-#   None - No parameters are required
-#
-# Returns:
-#   0 - On successful execution
-#   All operations are logged with appropriate debug and info messages
-#   UI component restarts that fail are logged as warnings but don't cause the function to exit
 set_macos_defaults() {
     log_debug "entering set_macos_defaults($(join_args "$@"))"
     log_info "Applying macOS system defaults"
@@ -378,27 +336,18 @@ set_macos_defaults() {
 
     ### Refresh UI ###
     log_debug "Restarting Finder and Dock to apply changes"
-    killall Finder >/dev/null 2>&1 || log_warning "Finder was not running"
-    killall Dock >/dev/null 2>&1 || log_warning "Dock was not running"
+    killall Finder > /dev/null 2>&1 || log_warning "Finder was not running"
+    killall Dock > /dev/null 2>&1 || log_warning "Dock was not running"
 
-    # Always return success, even if some settings couldn't be applied
     log_debug "exiting set_macos_defaults($(join_args "$@"))"
     return 0
-
 }
 
-# Main entry point for the script
-#
-# This function orchestrates the execution of all other functions, ensuring
-# that they are executed in the correct order and with the necessary logging.
-#
-# Arguments:
-#   $@ - All command line arguments passed to the script
-#
-# Returns:
-#   0 - On successful execution
 main() {
     log_debug "entering main($(join_args "$@"))"
+
+    # Initialize bypass flags first
+    source_bypass_defaults
 
     # Important groundwork
     cd "$(dirname "$0")" || exit 1
@@ -426,7 +375,6 @@ main() {
     if $BYPASS_OS_PACKAGES && $BYPASS_CARGO && $BYPASS_NPM; then
         log_info "All package bypass flags are true, skipping install_packages"
     else
-        # Unpack the boxes
         install_packages
     fi
 
