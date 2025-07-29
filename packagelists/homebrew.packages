@@ -93,6 +93,7 @@ docker                         # Containerization platform
 docker-completion              # Shell completion for Docker
 
 # File Processing
+gawk                           # GNU implementation of awk text processing language
 gdu                            # Disk usage analyzer with console interface
 imagemagick                    # Image manipulation tools
 p7zip                          # File archiver with high compression ratio  
