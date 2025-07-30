@@ -11,7 +11,6 @@ typeset -U path
 # Homebrew (macOS) GNU coreutils
 [[ -d "/opt/homebrew/bin" ]] && path=("/opt/homebrew/bin" $path)
 [[ -d "/opt/homebrew/opt/coreutils/libexec/gnubin" ]] && path=("/opt/homebrew/opt/coreutils/libexec/gnubin" $path)
-[[ -d "/opt/homebrew/opt/gawk/libexec/gnubin" ]] && path=("/opt/homebrew/opt/gawk/libexec/gnubin" $path)
 
 export PATH
 
@@ -46,7 +45,7 @@ else
     export VISUAL="$EDITOR"
 fi
 
+
 # -----------------------------------------------------------------------------
-# 4) Source .local version if it exists
-# -----------------------------------------------------------------------------
+# Local
 [[ -f "$HOME/.zprofile.local" ]] && source "$HOME/.zprofile.local"
