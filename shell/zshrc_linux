@@ -69,14 +69,6 @@ command -v xdg-open &>/dev/null && alias open='xdg-open'
 # Custom prompt
 source "$HOME/dotfiles/shell/prompt.zsh"
 
-if command -v fastfetch &>/dev/null; then
-    clear
-    fastfetch --structure Break:Break:Break:Title:Break:OS:CPU:GPU:Disk:Memory:Uptime:Display:Kernel:Packages:Shell:DE:WM:Terminal
-elif command -v neofetch &>/dev/null; then
-    clear
-    neofetch
-fi
-
 # -----------------------------------------------------------------------------
 # Local
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"

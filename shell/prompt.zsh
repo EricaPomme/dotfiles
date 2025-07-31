@@ -195,7 +195,7 @@ case "$distro" in
 esac
 
 # Wrap it up
-[[ -n "$icon" ]] && os_tag=$(echo -e " $icon ") || os_tag=""
+[[ -n "$icon" ]] && os_tag=$(echo -e " $icon ") || os_tag=" "
 
 # Custom prompt function
 build_prompt() {
