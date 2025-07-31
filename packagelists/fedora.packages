@@ -79,6 +79,9 @@ tldr                    # Simplified man pages
 # Gaming
 steam                   # Native ARM64 Steam client (uses Proton for x86_64 games)
 
+# Virtualization
+virt-manager            # Virtual machine manager
+
 # ARM64-specific notes:
 # For unavailable packages, consider these alternatives:
 # - eza: use lsd instead
