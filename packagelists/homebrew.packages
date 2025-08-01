@@ -85,6 +85,7 @@ pipx                           # Install and run Python applications in isolated
 gnupg                          # GNU Privacy Guard
 nmap                           # Network exploration and security scanner
 ssh-copy-id                    # Install SSH keys on remote hosts
+telnet                         # User interface to TELNET protocol
 wget                           # Internet file retriever
 ykman                          # YubiKey Manager CLI
 
