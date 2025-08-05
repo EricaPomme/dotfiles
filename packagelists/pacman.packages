@@ -17,6 +17,7 @@ lnav
 # Development tools
 git
 neovim
+helix
 python
 gcc
 make
