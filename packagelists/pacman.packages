@@ -35,3 +35,7 @@ tailscale
 pamac-aur
 wl-clipboard
 sunshine
+
+# Fingerprint reader support
+fprintd
+libfprint
