@@ -52,6 +52,7 @@ font-hack-nerd-font            # Hack font patched with Nerd Font icons
 # =============================
 
 # Core Development Tools
+gh                             # GitHub CLI tool
 git                            # Distributed version control system
 git-lfs                        # Git extension for versioning large files
 go                             # Go programming language
