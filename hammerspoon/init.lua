@@ -176,6 +176,16 @@ end)
 textMacro("f14", {}, "i", function()
     return os.date("%Y-%m-%dT%H:%M:%SZ")
 end)
+f14Mode:bind({}, "n", function() -- "Now" for my Excel sheets (Date in A, Time in B)
+    local d = os.date("%Y-%m-%d")
+    local t = os.date("%H:%M")
+    hs.eventtap.keyStrokes(d)
+    hs.eventtap.keyStroke({}, "tab")
+    hs.eventtap.keyStrokes(t)
+    hs.eventtap.keyStroke({}, "tab")
+    modalActive.f14 = true
+    f14Mode:exit()
+end)
 
 -------------------------------------------------------------------------------
 -- URL Cleaner
