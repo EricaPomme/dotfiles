@@ -1,27 +1,35 @@
 # ~/dotfiles/shell/zprofile_linux
-# -----------------------------------------------------------------------------
-# PATH configuration (login shells)
+
+### Core -----------------------------------------------------------------------
+## Environment Variables
 typeset -U path
-[[ -d "$HOME/.cargo/bin" ]] && path=("$HOME/.cargo/bin" $path) # cargo packages
+
+# Local bin and scripts first
 [[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path)
-[[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path) # personal scripts/bins
+[[ -d "$HOME/dotfiles/scripts" ]] && path=("$HOME/dotfiles/scripts" $path)
+
+# Language-specific package managers
+[[ -d "$HOME/.cargo/bin" ]] && path=("$HOME/.cargo/bin" $path)
 [[ -d "$HOME/.local/share/gem/ruby/3.4.0/bin" ]] && path=("$HOME/.local/share/gem/ruby/3.4.0/bin" $path)
-[[ -d "$HOME/dotfiles/scripts" ]] && path=("$HOME/dotfiles/scripts" $path) # repo tools
-[[ -d "/opt/local/bin" ]] && path=("/opt/local/bin" $path)                 # macports‐style
-[[ -d "/usr/local/bin" ]] && path=("/usr/local/bin" $path)                 # system-wide
+
+# System-wide paths
+[[ -d "/opt/local/bin" ]] && path=("/opt/local/bin" $path)
+[[ -d "/usr/local/bin" ]] && path=("/usr/local/bin" $path)
+
 export PATH
 
-# -----------------------------------------------------------------------------
-# Language/version managers
-if command -v pyenv &>/dev/null; then
-    export PYENV_ROOT="$HOME/.pyenv"                           # where pyenv lives
-    [[ -d $PYENV_ROOT/bin ]] && path=("$PYENV_ROOT/bin" $path) # shim lookup
-    eval "$(pyenv init -)"                                     # set up shims & hooks
+## Package Managers
+# pyenv setup
+if command -v pyenv > /dev/null 2>&1; then
+    export PYENV_ROOT="$HOME/.pyenv"
+    [[ -d $PYENV_ROOT/bin ]] && path=("$PYENV_ROOT/bin" $path)
+    eval "$(pyenv init -)"
 fi
 
-# -----------------------------------------------------------------------------
-# Editor environment
-if command -v hx &>/dev/null; then
+### Tools ----------------------------------------------------------------------
+## Editor Settings
+# Primary editor selection
+if command -v hx > /dev/null 2>&1; then
     export EDITOR="hx"
     alias e="hx"
 else
@@ -29,12 +37,13 @@ else
     alias e="nano"
 fi
 
-if command -v code &>/dev/null; then
+# Visual editor for GUI contexts
+if command -v code > /dev/null 2>&1; then
     export VISUAL="code"
 else
     export VISUAL="$EDITOR"
 fi
 
-# -----------------------------------------------------------------------------
-# Local
+### Local ----------------------------------------------------------------------
+# User-specific overrides
 [[ -f "$HOME/.zprofile.local" ]] && source "$HOME/.zprofile.local"

@@ -1,13 +1,16 @@
+# ~/dotfiles/shell/zshrc_macos
 # Bail if non-interactive
 [[ $- != *i* ]] && return
 
+### Core -----------------------------------------------------------------------
+## Shell Configuration
 # Flags and other important variables
 DEBUG=${DEBUG:-false}
 LOADED_EXTRAS=()
 
 # Source shell integrations and extras (interactive only)
-# Note that list_shell_extras is using a tagging + relative path convention
-list_shell_extras=(
+# Note that includes is using a tagging + relative path convention
+includes=(
   "home/.iterm2_shell_integration.zsh" # iTerm2 shell integration
   "home/.zprezto/init.zsh"             # Load prezto if we have it
   "shell/alias_eza.zsh"                # Pretty ls alternative + preferences
@@ -16,9 +19,10 @@ list_shell_extras=(
   "shell/alias_tar.zsh"                # Tar with exclusions
   "shell/git_pull_nudge.zsh"           # Did you forget to pull? (Yes.)
   "shell/weekly_update_check.zsh"      # Check for updates weekly
+  "shell/completions.zsh"              # CLI tool completions
 )
 
-for rel_path in "${list_shell_extras[@]}"; do
+for rel_path in "${includes[@]}"; do
   case $rel_path in
   shell/*)
     full_path="${HOME}/dotfiles/${rel_path}"
@@ -47,11 +51,30 @@ for rel_path in "${list_shell_extras[@]}"; do
   fi
 done
 
-# eza or ls
+## Aliases
+# eza or ls fallback
 command -v eza &>/dev/null || alias l='ls -l'
 
+### Tools ----------------------------------------------------------------------
+## Disk Usage
+# gdu (Go Disk Usage) - avoid conflict with GNU coreutils du
+alias gdu='gdu-go'
+
+# pdu (parallel disk usage) - better du replacement
+if command -v pdu &>/dev/null; then
+  alias du='pdu --top-down --progress --silent-errors'
+fi
+
+## Dotfiles Management
+# Quick update and install shortcuts
+alias dotfile-install='(cd ~/dotfiles && git pull && ./install.sh) || echo "Failed to pull or install"'
+alias dotfile-update='(cd ~/dotfiles && git pull && ./update.sh) || echo "Failed to pull or update"'
+
+### Shell ----------------------------------------------------------------------
+## Functions
 # WAN IP lookups
 ipv4() { curl -4fsSL https://ifconfig.me; }
+
 ipv6() {
   if command -v ip &>/dev/null; then
     ip -6 addr show scope global | grep -oP '(?<=inet6 )[0-9A-Fa-f:]+' ||
@@ -64,30 +87,17 @@ ipv6() {
 # UpNote piping
 upnote_add() { ~/dotfiles/scripts/upnote_add.py "$@" &>/dev/null; }
 
-# gdu (Go Disk Usage) - avoid conflict with GNU coreutils du
-alias gdu='gdu-go'
-
-# pdu (parallel disk usage) - better du replacement
-if command -v pdu &>/dev/null; then
-  alias du='pdu --top-down --progress --silent-errors'
-fi
-
-# Dotfiles management
-alias dotfile-install='(cd ~/dotfiles && git pull && ./install.sh) || echo "Failed to pull or install"'
-alias dotfile-update='(cd ~/dotfiles && git pull && ./update.sh) || echo "Failed to pull or update"'
-
-# # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-# if [[ -f ~/.p10k.zsh ]] && [[ "$LOADED_EXTRAS" =~ "/.zprezto/init.zsh" ]]; then
-#   source ~/.p10k.zsh
-# fi
-
-# Local
-[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
-
-# Custom prompt
+## Prompt
+# Custom prompt configuration
 source "$HOME/dotfiles/shell/prompt.zsh"
 
+### External -------------------------------------------------------------------
+## LM Studio CLI
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/Users/erica/.lmstudio/bin"
 # End of LM Studio CLI section
+
+### Local ----------------------------------------------------------------------
+# User-specific overrides
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
 

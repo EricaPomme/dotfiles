@@ -13,7 +13,27 @@ done
 
 # Set includes/excludes
 [[ ! "$(pwd)" == "$HOME" ]] && INCLUDES+=("$HOME") || INCLUDES=()
-EXCLUDES=(.git .Trash node_modules Library __pycache__)
+
+# Exclude list - uncomment/add as needed for your system(s)
+EXCLUDES=(
+    # Version control
+    .git .hg .svn
+    
+    # Package management
+    node_modules
+    
+    # Cache files
+    __pycache__ .cache .npm .yarn
+    
+    # Build directories
+    build dist target
+    
+    # macOS specific
+    .Trash Library "Library/Application Support" "Library/Caches"
+    
+    # Linux specific
+    .local/share/Trash .thumbnails .gvfs
+)
 
 FD_ARGS=(--type f --type d)
 for exclude in $EXCLUDES; do

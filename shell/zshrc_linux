@@ -1,61 +1,71 @@
-# Bail if not interactive
-# -----------------------------------------------------------------------------
+# ~/dotfiles/shell/zshrc_linux
+# Bail if non-interactive
 [[ $- != *i* ]] && return
 
+### Core -----------------------------------------------------------------------
+## Shell Configuration
+# Flags and other important variables
+DEBUG=${DEBUG:-false}
+LOADED_EXTRAS=()
 
-# Shell extras
-# -----------------------------------------------------------------------------
-source "$HOME/dotfiles/shell/git_pull_nudge.zsh" # remind on stale repos
-source "$HOME/dotfiles/shell/weekly_update_check.zsh" # weekly update reminders
+# Source shell integrations and extras (interactive only)
+# Note that includes is using a tagging + relative path convention
+includes=(
+  "shell/git_pull_nudge.zsh"           # Did you forget to pull? (Yes.)
+  "shell/weekly_update_check.zsh"      # Check for updates weekly
+  "shell/fzf.zsh"                      # Fuzzy Finder
+  "shell/alias_dots.zsh"               # Dots for to go up good and fastly
+  "shell/alias_tar.zsh"                # Tar with exclusions
+  "shell/alias_helix.zsh"              # Helix editor aliases
+  "shell/alias_eza.zsh"                # Pretty ls alternative + preferences
+  "shell/completions.zsh"              # CLI tool completions
+)
 
-# -----------------------------------------------------------------------------
-# FZF config
-if command -v fd &>/dev/null; then
-    export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix --hidden --follow --exclude .git'
-elif command -v rg &>/dev/null; then
-    export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
-else
-    export FZF_DEFAULT_COMMAND='find . -path "*/\.*" -prune -o -type f -print 2>/dev/null | cut -b3-'
-fi
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND" # ctrl-T lookup
-export FZF_ALT_C_COMMAND='fd --type d --strip-cwd-prefix --hidden --follow --exclude .git'
-export FZF_DEFAULT_OPTS='--height 60% --layout=reverse --border --preview "head -100 {}" --preview-window=right:50%:wrap'
-
-for p in /usr/share/fzf/key-bindings.zsh /usr/share/doc/fzf/examples/key-bindings.zsh "$HOME/.fzf/shell/key-bindings.zsh"; do
-    [[ -f $p ]] && source $p && break
+for rel_path in "${includes[@]}"; do
+  case $rel_path in
+  shell/*)
+    full_path="${HOME}/dotfiles/${rel_path}"
+    ;;
+  home/*)
+    full_path="${HOME}/${rel_path#home/}"
+    ;;
+  *)
+    full_path="${rel_path}"
+    ;;
+  esac
+  if [[ ! " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]] && [[ -f "$full_path" ]]; then
+    LOADED_EXTRAS+=("${full_path}")
+    source "$full_path"
+    if [[ $DEBUG == true ]] && [[ ! " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]]; then
+      echo "Loaded shell extra: ${full_path}"
+    fi
+  else
+    if [[ $DEBUG == true ]]; then
+      if [[ ! -f "$full_path" ]]; then
+        echo "Skipping missing shell extra: ${full_path}"
+      elif [[ " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]]; then
+        echo "Skipping already loaded shell extra: ${full_path}"
+      fi
+    fi
+  fi
 done
-for p in /usr/share/fzf/completion.zsh /usr/share/doc/fzf/examples/completion.zsh "$HOME/.fzf/shell/completion.zsh"; do
-    [[ -f $p ]] && source $p && break
-done
 
-# -----------------------------------------------------------------------------
-# Aliases & enhancers
-# “.” up shortcuts
-source "$HOME/dotfiles/shell/alias_dots.zsh"
-
-# tar with exclusion
-source "$HOME/dotfiles/shell/alias_tar.zsh"
-
-# helix alias setup
-source "$HOME/dotfiles/shell/alias_helix.zsh"
-
-# Nicer versions of common commands
-if command -v eza &>/dev/null; then
-    source "$HOME/dotfiles/shell/alias_eza.zsh"
-else
-    alias l='ls -la'
-fi
+## Aliases
+# eza or ls fallback
+command -v eza &>/dev/null || alias l='ls -la'
 
 # pdu (parallel disk usage) - better du replacement
 if command -v pdu &>/dev/null; then
-    alias du='pdu --top-down --progress --silent-errors'
+  alias du='pdu --top-down --progress --silent-errors'
 fi
 
-# -----------------------------------------------------------------------------
-# Functions
+### Shell ----------------------------------------------------------------------
+## Functions
+# WAN IP lookups
 ipv4() {
     curl -4fsSL https://ifconfig.me
 }
+
 ipv6() {
     if command -v ip &>/dev/null; then
         ip -6 addr show scope global | grep -oP '(?<=inet6 )[0-9A-Fa-f:]+'
@@ -63,12 +73,14 @@ ipv6() {
         ifconfig | awk '/inet6/&&!/fe80/ {print $2}'
     fi
 }
+
+# Linux-specific aliases
 command -v xdg-open &>/dev/null && alias open='xdg-open'
 
-# -----------------------------------------------------------------------------
-# Custom prompt
+## Prompt
+# Custom prompt configuration
 source "$HOME/dotfiles/shell/prompt.zsh"
 
-# -----------------------------------------------------------------------------
-# Local
+### Local ----------------------------------------------------------------------
+# User-specific overrides
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
