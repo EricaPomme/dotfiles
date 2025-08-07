@@ -59,6 +59,7 @@ go                             # Go programming language
 node                           # JavaScript runtime built on V8
 pyenv                          # Python version management
 rust                           # Systems programming language
+virtualenv                     # Virtual environment creation tool for Python
 
 # Shell & Terminal Tools
 bat                            # Cat clone with syntax highlighting
