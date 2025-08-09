@@ -44,9 +44,9 @@ git_pull_nudge() {
     git_status_output=$(git status -sb 2>/dev/null)
 
     if echo "$git_status_output" | grep -q '\[behind'; then
-        echo -e "\e[33m🔄  Repo is behind remote! Consider running 'git pull'.\e[0m"
+        echo -e "\e[33m  Repo is behind remote! Consider running 'git pull'.\e[0m"
     else
-        echo -e "\e[32m✅  Repo is up to date with remote.\e[0m"
+        echo -e "\e[32m  Repo is up to date with remote.\e[0m"
     fi
 }
 

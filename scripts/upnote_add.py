@@ -7,8 +7,8 @@ from datetime import datetime
 
 def sanitize_text(text):
     replacements = {
-        '‘': "'", '’': "'", '“': '"', '”': '"',
-        '–': '-', '—': '--', '…': '...',
+        ''': "'", ''': "'", '"': '"', '"': '"',
+        '-': '-', '-': '--', '...': '...',
     }
     for old, new in replacements.items():
         text = text.replace(old, new)
@@ -27,12 +27,12 @@ def markdown_lint(text):
             tmp_name = tmp.name
         subprocess.run(["markdownlint", tmp_name])
     except Exception as e:
-        print(f"⚠️  Linting skipped due to error: {e}", file=sys.stderr)
+        print(f"  Linting skipped due to error: {e}", file=sys.stderr)
 
 def clean_title(raw_title):
     # Strip leading markdown heading chars and trailing colons/dashes
     title = re.sub(r'^\s*#+\s*', '', raw_title)        # Remove leading #
-    title = re.sub(r'[\s:–—\-]+$', '', title)           # Remove trailing punctuation
+    title = re.sub(r'[\s:--\-]+$', '', title)           # Remove trailing punctuation
     return title.strip()
 
 def main():

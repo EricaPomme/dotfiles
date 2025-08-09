@@ -44,7 +44,7 @@ end
 -------------------------------------------------------------------------------
 -- Keystroke helper: supports optional exit or repeat
 -- usage: keystroke(mode, mods, inputKey, outputMods, outputKey, exitOnPress)
---   exitOnPress: boolean (default=true) – if false, modal stays active
+--   exitOnPress: boolean (default=true) - if false, modal stays active
 function keystroke(mode, mods, inputKey, outputMods, outputKey, exitOnPress)
     exitOnPress = (exitOnPress == nil) and true or exitOnPress
     local m = ({ f13 = f13Mode, f14 = f14Mode, f15 = f15Mode })[mode]
@@ -68,7 +68,7 @@ function keystroke(mode, mods, inputKey, outputMods, outputKey, exitOnPress)
     m:bind(mods, inputKey, handlePress, nil, handleRepeat)
 end
 
--- Text‑insertion macros (static or dynamic)
+-- Text-insertion macros (static or dynamic)
 -- usage: textMacro(mode, mods, key, content)
 --   content: either a string or a function that returns a string
 function textMacro(mode, mods, key, content)
@@ -283,9 +283,9 @@ end)
 -------------------------------------------------------------------------------
 -- hidutil Remap
 local remap = {
-    { HIDKeyboardModifierMappingSrc = 0x700000039, HIDKeyboardModifierMappingDst = 0x700000068 }, -- Caps → F13
-    { HIDKeyboardModifierMappingSrc = 0x7000000e7, HIDKeyboardModifierMappingDst = 0x700000069 }, -- RCmd → F14
-    { HIDKeyboardModifierMappingSrc = 0x7000000e6, HIDKeyboardModifierMappingDst = 0x70000006A }  -- ROpt → F15
+    { HIDKeyboardModifierMappingSrc = 0x700000039, HIDKeyboardModifierMappingDst = 0x700000068 }, -- Caps -> F13
+    { HIDKeyboardModifierMappingSrc = 0x7000000e7, HIDKeyboardModifierMappingDst = 0x700000069 }, -- RCmd -> F14
+    { HIDKeyboardModifierMappingSrc = 0x7000000e6, HIDKeyboardModifierMappingDst = 0x70000006A }  -- ROpt -> F15
 }
 local json = hs.json.encode(remap)
 local command = "hidutil property --set '" .. '{"UserKeyMapping": ' .. json .. "}'"
@@ -295,7 +295,7 @@ hs.task.new("/bin/zsh", nil, function() return false end, {"-c", command}):start
 local lastResetTime = 0
 hs.hotkey.bind({"cmd", "alt", "ctrl"}, "R", function()
     local now = hs.timer.absoluteTime() / 1e9
-    if now - lastResetTime < 2 then hs.alert("Wait a sec…", 0.5) return end
+    if now - lastResetTime < 2 then hs.alert("Wait a sec...", 0.5) return end
     lastResetTime = now
     hs.task.new("/bin/zsh", nil, function() return false end,
         {"-c", "hidutil property --set '{\"UserKeyMapping\": []}'"}):start()

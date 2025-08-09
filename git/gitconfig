@@ -2,6 +2,17 @@
     name = Erica Young
     email = erica@pomme.cafe
 
-# Load additional settings like credentials from ~/.gitconfig.local if present
+[core]
+    hooksPath = ~/dotfiles/git/hooks
+    attributesFile = ~/dotfiles/git/attributes
+    autocrlf = input
+    safecrlf = true
+
+[alias]
+    # List tracked files containing control chars (excludes TAB/LF/CR)
+	scan-ctrl = "!git ls-files | while read f; do if perl -0777 -ne \"exit 1 if /[^\\\\t\\\\n\\\\r\\\\x20-\\\\x7E]/\" \"$f\" 2>/dev/null; then :; else echo \"$f: contains non-ASCII/control characters\"; fi; done"
+    # Strip control chars in-place (TAB/LF/CR preserved)
+    fix-ctrl = "!f(){ for x in \"$@\"; do perl -0777 -pe 's/[^\\t\\n\\r\\x20-\\x7E]//g' -i -- \"$x\"; done; }; f"
+
 [include]
     path = ~/.gitconfig.local

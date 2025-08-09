@@ -1,9 +1,9 @@
-# ────────────────────────────────────────────────────────────────────────────────
-# languages.toml — *everything commented out on purpose*
+# 
+# languages.toml - *everything commented out on purpose*
 # Start by uncommenting a single [[language]] block plus its server definition,
-# then reload Helix to test.  The “NOTE:” lines flag what changed from your
+# then reload Helix to test.  The "NOTE:" lines flag what changed from your
 # original file.
-# ────────────────────────────────────────────────────────────────────────────────
+# 
 
 # [[language]]
 # name = "awk"
@@ -39,7 +39,7 @@
 # name = "css"
 # language-servers = ["vscode-css-language-server"]
 # auto-format      = true
-# NOTE: rely on Prettier’s file‑type detection
+# NOTE: rely on Prettier's file-type detection
 # formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
 
 # [[language]]
@@ -48,7 +48,7 @@
 
 # [[language]]
 # name = "docker-compose"
-# NOTE: removed deprecated docker‑compose‑language‑service; use YAML LSP instead
+# NOTE: removed deprecated docker-compose-language-service; use YAML LSP instead
 # language-servers = ["yaml-language-server"]
 
 # [[language]]
@@ -59,7 +59,7 @@
 
 # [[language]]
 # name = "go"
-# language-servers = ["gopls"]  # NOTE: golangci‑lint‑lsp removed to avoid dupes
+# language-servers = ["gopls"]  # NOTE: golangci-lint-lsp removed to avoid dupes
 # auto-format      = true
 # formatter        = { command = "goimports" }
 
@@ -135,7 +135,7 @@
 
 # [[language]]
 # name = "pkgbuild"
-# NOTE: still Bash‑based; limited PKGBUILD‑specific diagnostics
+# NOTE: still Bash-based; limited PKGBUILD-specific diagnostics
 # language-servers = ["bash-language-server"]
 
 # [[language]]
@@ -154,7 +154,7 @@
 # [[language]]
 # name = "rust"
 # language-servers = ["rust-analyzer"]
-# auto-format      = true  # rustfmt via rust‑analyzer
+# auto-format      = true  # rustfmt via rust-analyzer
 
 # [[language]]
 # name = "swift"
@@ -185,9 +185,9 @@
 # auto-format      = true
 # formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
 
-# ──────────────────────────
+# 
 # Language server definitions
-# ──────────────────────────
+# 
 
 # [language-server.awk-language-server]
 # command = "awk-language-server"
@@ -223,7 +223,7 @@
 # command = "yaml-language-server"
 # args    = ["--stdio"]
 
-# # docker-compose-language-service removed — deprecated upstream
+# # docker-compose-language-service removed - deprecated upstream
 
 # [language-server.fish-lsp]
 # command = "fish-lsp"

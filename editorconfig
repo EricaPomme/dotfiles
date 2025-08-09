@@ -69,3 +69,32 @@ indent_size = 2
 # ----------------------------------------
 [Makefile]
 indent_style = tab
+
+# ----------------------------------------
+# Shell-ish files without extensions
+# ----------------------------------------
+[{.bashrc,.bash_profile,.zshrc,.zprofile,.profile,.env,*.env,*.rc,PKGBUILD,configure,configure.ac}]
+end_of_line = lf
+charset = utf-8
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+# Git hooks (usually no extension)
+[.git/hooks/*]
+end_of_line = lf
+charset = utf-8
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+# Dockerfiles
+[{Dockerfile,Containerfile,*.dockerfile}]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+
+# Patches/diffs - preserve trailing spaces exactly
+[*.{patch,diff}]
+trim_trailing_whitespace = false

@@ -13,7 +13,7 @@ _check_weekly_update() {
         local time_diff=$((current_time - last_check))
         
         if [[ $time_diff -ge $week_seconds ]]; then
-            echo "\033[33m⚠️  It's been a week since your last update check.\033[0m"
+            echo "\033[33m  It's been a week since your last update check.\033[0m"
             echo "\033[36mWould you like to run the update script? (y/N)\033[0m"
             read -q "REPLY?" && echo
             if [[ $REPLY =~ ^[Yy]$ ]]; then
