@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
-IFS=$'\n\t'
+set -euo pipefail
 
-# Collect staged files (Added, Copied, Modified) in a portable way.
-files=()
-while IFS= read -r f; do
-    [[ -n "$f" ]] && files+=("$f")
-done < <(git diff --cached --name-only --diff-filter=ACM || true)
-
+mapfile -t files < <(git diff --cached --name-only --diff-filter=ACM || true)
 ((${#files[@]})) || exit 0
 
 bad=0
@@ -15,18 +9,14 @@ bad=0
 for f in "${files[@]}"; do
   [[ -f "$f" ]] || continue
 
-  # Detect NUL bytes (binary blobs)
-  if grep -Il $'\x00' -- "$f" > /dev/null 2>&1; then
+  if LC_ALL=C grep -Il $'\x00' -- "$f" >/dev/null 2>&1; then
     echo "NUL byte found in $f" >&2
     bad=1
   fi
 
-  # Fail on non-ASCII/control characters
   if ! perl -ne 'exit 1 if /[^\t\n\r\x20-\x7E]/; END{exit 0}' "$f"; then
     echo "Control/non-printable characters found in $f" >&2
-    if command -v xxd > /dev/null 2>&1; then
-      xxd -g 1 -l 64 -- "$f" >&2 || true
-    fi
+    command -v xxd >/dev/null && xxd -g 1 -l 64 -- "$f" >&2 || true
     bad=1
   fi
 done
