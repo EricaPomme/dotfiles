@@ -6,7 +6,7 @@
 
 set -e
 
-echo " Installing Language Servers, Formatters, and Debug Adapters for Helix..."
+echo "🚀 Installing Language Servers, Formatters, and Debug Adapters for Helix..."
 echo
 
 # Detect OS
@@ -31,28 +31,28 @@ detect_os
 # Check for required tools
 check_command() {
     if ! command -v "$1" &> /dev/null; then
-        echo " $1 is not installed. Please install it first."
+        echo "❌ $1 is not installed. Please install it first."
         return 1
     fi
 }
 
 # Function to install with error handling
 install_safe() {
-    echo " Installing $1..."
+    echo "📦 Installing $1..."
     if eval "$2"; then
-        echo " $1 installed successfully"
+        echo "✅ $1 installed successfully"
     else
-        echo " Failed to install $1"
+        echo "❌ Failed to install $1"
     fi
     echo
 }
 
 # System packages
-echo " Installing system packages..."
+echo "📦 Installing system packages..."
 case "$OS" in
     "macos")
         if ! check_command "brew"; then
-            echo " Homebrew not found. Please install it first: https://brew.sh"
+            echo "❌ Homebrew not found. Please install it first: https://brew.sh"
             exit 1
         fi
         brew_packages=(
@@ -75,14 +75,14 @@ case "$OS" in
         )
         for package in "${brew_packages[@]}"; do
             if brew list "$package" &>/dev/null; then
-                echo " $package already installed"
+                echo "✅ $package already installed"
             else
                 install_safe "$package" "brew install $package"
             fi
         done
         # Ensure node is linked properly
         if brew list node &>/dev/null && ! command -v node &>/dev/null; then
-            echo " Linking node..."
+            echo "🔧 Linking node..."
             brew link --overwrite node
         fi
         ;;
@@ -144,25 +144,25 @@ case "$OS" in
         done
         ;;
     *)
-        echo " Unknown OS: $OS. Skipping system package installation."
+        echo "⚠️ Unknown OS: $OS. Skipping system package installation."
         echo "Please manually install: clangd, nodejs, npm, python3, go, rust, rust-analyzer"
         ;;
 esac
 
 # Configure npm for user installs (fix permission issues)
 if check_command "npm" && [[ ! -f "$HOME/.npmrc" || ! $(grep -q "prefix=" "$HOME/.npmrc" 2>/dev/null) ]]; then
-    echo " Configuring npm for user installs..."
+    echo "🔧 Configuring npm for user installs..."
     mkdir -p "$HOME/.local/lib"
     npm config set prefix "$HOME/.local"
     echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> ~/.zshrc
     export PATH="$HOME/.local/bin:$PATH"
-    echo " npm configured for user installs"
+    echo "✅ npm configured for user installs"
     echo
 fi
 
 # Node.js packages
 if check_command "npm"; then
-    echo " Installing npm packages..."
+    echo "📦 Installing npm packages..."
     npm_packages=(
         # Language Servers
         "bash-language-server"
@@ -190,7 +190,7 @@ fi
 
 # Python packages - use pipx for isolated installs
 if check_command "pipx" || { [[ "$OS" == "macos" ]] && { brew list pipx &>/dev/null || install_safe "pipx" "brew install pipx"; }; }; then
-    echo " Installing Python packages..."
+    echo "🐍 Installing Python packages..."
     if check_command "pipx"; then
         # Language Servers
         install_safe "Python LSP Server" "pipx install 'python-lsp-server[all]'"
@@ -204,12 +204,12 @@ if check_command "pipx" || { [[ "$OS" == "macos" ]] && { brew list pipx &>/dev/n
         install_safe "debugpy" "pipx install debugpy"
     fi
 else
-    echo " pipx is not installed. Please install it first."
+    echo "❌ pipx is not installed. Please install it first."
 fi
 
 # Go packages
 if check_command "go"; then
-    echo " Installing Go packages..."
+    echo "🐹 Installing Go packages..."
     # Language Servers
     install_safe "gopls" "go install golang.org/x/tools/gopls@latest"
     # Formatters
@@ -218,20 +218,20 @@ if check_command "go"; then
     # Debug Adapters
     install_safe "delve (dlv)" "go install github.com/go-delve/delve/cmd/dlv@latest"
 else
-    echo " go is not installed. Please install it first."
+    echo "❌ go is not installed. Please install it first."
 fi
 
 # Rust packages
 if check_command "cargo"; then
-    echo " Installing Rust packages..."
+    echo "🦀 Installing Rust packages..."
     # Language Servers
     install_safe "asm-lsp" "cargo install asm-lsp"
     # nil LSP server for Nix - only install if nix is available
     if check_command "nix"; then
         install_safe "nil (Nix LSP)" "cargo install --git https://github.com/oxalica/nil nil"
     else
-        echo " nix is not installed. Please install it first."
-        echo " Skipping nil (Nix LSP) - requires nix to build"
+        echo "❌ nix is not installed. Please install it first."
+        echo "🦀 Skipping nil (Nix LSP) - requires nix to build"
     fi
     # Formatters
     if ! command -v rustfmt &>/dev/null; then
@@ -253,7 +253,7 @@ fi
 if check_command "gem"; then
     RUBY_VERSION=$(ruby -v | grep -o '[0-9]\+\.[0-9]\+')
     if [[ "$RUBY_VERSION" > "2.7" || "$RUBY_VERSION" == "2.7" ]]; then
-        echo " Installing Ruby packages..."
+        echo "💎 Installing Ruby packages..."
         # Language Servers
         install_safe "Ruby LSP" "gem install --user-install ruby-lsp"
         install_safe "Solargraph" "gem install --user-install solargraph"
@@ -263,12 +263,12 @@ if check_command "gem"; then
         install_safe "ruby-debug-ide" "gem install --user-install ruby-debug-ide"
         install_safe "debase" "gem install --user-install debase"
     else
-        echo " Skipping Ruby packages (Ruby $RUBY_VERSION too old, need 2.7+)"
+        echo "💎 Skipping Ruby packages (Ruby $RUBY_VERSION too old, need 2.7+)"
     fi
 fi
 
 # Additional formatters and tools (cross-platform via other package managers)
-echo " Installing additional formatters..."
+echo "🎨 Installing additional formatters..."
 
 # Install additional Rust formatters if cargo is available
 if check_command "cargo"; then
@@ -284,20 +284,20 @@ fi
 
 # Fix prettier conflict if it exists (macOS specific)
 if [[ "$OS" == "macos" ]] && brew list prettier &>/dev/null && [[ -L "/opt/homebrew/bin/prettier" ]]; then
-    echo " Fixing prettier symlink conflict..."
+    echo "🔧 Fixing prettier symlink conflict..."
     brew unlink prettier && brew link --overwrite prettier
 fi
 
 # Add clangd to PATH if installed via llvm (macOS specific)
 if [[ "$OS" == "macos" ]] && brew list llvm &>/dev/null && ! command -v clangd &>/dev/null; then
-    echo " Adding clangd to PATH..."
+    echo "🔧 Adding clangd to PATH..."
     echo 'export PATH="$(brew --prefix llvm)/bin:$PATH"' >> ~/.zshrc
     echo "Run: source ~/.zshrc or restart terminal to use clangd"
 fi
 
-echo " Language servers, formatters, and debug adapters installation complete!"
+echo "🎉 Language servers, formatters, and debug adapters installation complete!"
 echo
-echo " Run 'hx --health' to check which language servers are working"
-echo " Link configs: ln -sf ~/dotfiles/helix/* ~/.config/helix/"
+echo "💡 Run 'hx --health' to check which language servers are working"
+echo "🔗 Link configs: ln -sf ~/dotfiles/helix/* ~/.config/helix/"
 echo
 echo "Note: You may need to restart your terminal or run 'source ~/.zshrc' to update your PATH."

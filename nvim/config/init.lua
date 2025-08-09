@@ -42,11 +42,11 @@ vim.opt.signcolumn = 'yes'     -- Always show the sign column (for diagnostics)
 vim.opt.colorcolumn = '80'     -- Show column at 80 characters
 vim.opt.list = true            -- Show invisible characters
 vim.opt.listchars = {          -- How to show invisible characters
-  tab = ' ',
-  trail = '',
-  extends = '',
-  precedes = '',
-  nbsp = ''
+  tab = '» ',
+  trail = '·',
+  extends = '›',
+  precedes = '‹',
+  nbsp = '␣'
 }
 
 -- Key Mappings

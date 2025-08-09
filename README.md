@@ -7,7 +7,7 @@ These scripts install a minimal environment by linking configuration files and i
 - macOS (Homebrew)
 - Debian/Ubuntu (apt)
 - Fedora (dnf)
-- Arch-based (pacman)  includes Manjaro, EndeavourOS, CachyOS, Garuda, etc.
+- Arch-based (pacman) — includes Manjaro, EndeavourOS, CachyOS, Garuda, etc.
 - **NixOS** (nix-env)
 
 NixOS support is intentionally lightweight. If you manage packages declaratively, you can skip running the package installation step.

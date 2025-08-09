@@ -24,7 +24,7 @@ indent-heuristic = "hybrid"
 left = ["mode", "spinner", "file-name", "total-line-numbers"]
 center = []
 right = ["diagnostics", "selections", "register", "position", "file-encoding"]
-separator = ""
+separator = "│"
 mode.normal = "NORMAL"
 mode.insert = "INSERT"
 mode.select = "SELECT"
@@ -69,11 +69,11 @@ wrap-around = true
 
 [editor.whitespace]
 render = "all"
-characters = { space = "", nbsp = "", tab = "->", newline = "", tabpad = "" }
+characters = { space = "·", nbsp = "⍽", tab = "→", newline = "⏎", tabpad = "·" }
 
 [editor.indent-guides]
 render = true
-character = ""
+character = "╎"
 skip-levels = 1
 
 [editor.gutters]

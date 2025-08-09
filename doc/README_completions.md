@@ -50,11 +50,11 @@ These tools support completions but require user intervention:
 ## File Structure
 ```
 ~/.local/share/zsh/completions/
- _bat         # bat (better cat) completion
- _docker      # Docker CLI completion
- _gh          # GitHub CLI completion  
- _kubectl     # Kubernetes CLI completion
- _pip3        # pip3 completion
- _rg          # ripgrep completion
- _rustup      # Rust toolchain completion
+├── _bat         # bat (better cat) completion
+├── _docker      # Docker CLI completion
+├── _gh          # GitHub CLI completion  
+├── _kubectl     # Kubernetes CLI completion
+├── _pip3        # pip3 completion
+├── _rg          # ripgrep completion
+└── _rustup      # Rust toolchain completion
 ```

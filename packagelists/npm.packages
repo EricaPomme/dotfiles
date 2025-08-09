@@ -10,4 +10,4 @@ npm-check-updates              # CLI tool to find and update outdated npm depend
 http-server                    # Simple zero-config static file server (great for testing docs or sites)
 
 # Scripting / Automation
-zx                             # Scripting tool from Google - write shell scripts in modern JavaScript
+zx                             # Scripting tool from Google — write shell scripts in modern JavaScript

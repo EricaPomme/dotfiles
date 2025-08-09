@@ -17,7 +17,7 @@ if [ -z "$TARGET" ] || [ ! -e "$TARGET" ]; then
 fi
 
 if [ -d "$TARGET" ]; then
-    echo " Directory: $TARGET"
+    echo "📁 Directory: $TARGET"
     ls -lah --color=always "$TARGET" | head -100
     exit 0
 fi
