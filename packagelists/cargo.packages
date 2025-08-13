@@ -27,4 +27,4 @@ bandwhich               # Terminal bandwidth utilization tool
 #dust                    # More intuitive version of du (disk usage)
 #xh                      # Friendly and fast tool for sending HTTP requests
 #grex                    # Command-line tool for generating regular expressions
-termscp                  # SCP TUI
+#termscp                  # COMMENTED OUT - BUILD FAILS                  # SCP TUI
