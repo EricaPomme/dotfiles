@@ -77,7 +77,7 @@ fail2ban                # Ban hosts that cause multiple authentication errors
 tldr                    # Simplified man pages
 
 # Gaming
-steam                   # Native ARM64 Steam client (uses Proton for x86_64 games)
+#steam                   # NOT AVAILABLE IN REPOS - COMMENTED OUT                   # Native ARM64 Steam client (uses Proton for x86_64 games)
 
 # Virtualization
 virt-manager            # Virtual machine manager
@@ -88,4 +88,4 @@ virt-manager            # Virtual machine manager
 # - pipenv: install via pip
 # - mlocate: use native find command
 input-remapper
-telegram-desktop
+#telegram-desktop        # NOT AVAILABLE IN REPOS - COMMENTED OUT
