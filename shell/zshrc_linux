@@ -1,6 +1,10 @@
 # ~/dotfiles/shell/zshrc_linux
-# Bail if non-interactive
-[[ $- != *i* ]] && return
+# Bail if non-interactive (with Warp terminal compatibility)
+# Warp may handle interactive detection differently
+if [[ "$TERM_PROGRAM" != "WarpTerminal" ]]; then
+    # Standard interactive check for other terminals
+    [[ -o interactive ]] || return
+fi
 
 ### Core -----------------------------------------------------------------------
 ## Shell Configuration
@@ -35,10 +39,9 @@ for rel_path in "${includes[@]}"; do
   esac
   if [[ ! " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]] && [[ -f "$full_path" ]]; then
     LOADED_EXTRAS+=("${full_path}")
+    [[ $DEBUG == true ]] && echo "Loading shell extra: ${full_path}"
     source "$full_path"
-    if [[ $DEBUG == true ]] && [[ ! " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]]; then
-      echo "Loaded shell extra: ${full_path}"
-    fi
+    [[ $DEBUG == true ]] && echo "Loaded shell extra: ${full_path}"
   else
     if [[ $DEBUG == true ]]; then
       if [[ ! -f "$full_path" ]]; then
@@ -84,3 +87,4 @@ source "$HOME/dotfiles/shell/prompt.zsh"
 ### Local ----------------------------------------------------------------------
 # User-specific overrides
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+export PATH="$HOME/.local/bin:$PATH"
