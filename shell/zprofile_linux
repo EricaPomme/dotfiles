@@ -47,3 +47,56 @@ fi
 ### Local ----------------------------------------------------------------------
 # User-specific overrides
 [[ -f "$HOME/.zprofile.local" ]] && source "$HOME/.zprofile.local"
+
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# udisks convenience functions
+if command -v udisksctl &>/dev/null; then
+    # Mount device and cd to mount point
+    mnt() {
+        if [[ $# -eq 0 ]]; then
+            echo "Usage: mnt <device>"
+            return 1
+        fi
+        
+        local output
+        output=$(udisksctl mount -b "$1" 2>&1)
+        local exit_code=$?
+        
+        if [[ $exit_code -eq 0 ]]; then
+            # Extract mount point from output like "Mounted /dev/sda1 at /media/user/label"
+            local mount_point
+            mount_point=$(echo "$output" | grep -o 'at .*' | cut -d' ' -f2-)
+            if [[ -n "$mount_point" ]]; then
+                echo "$output"
+                cd "$mount_point"
+            else
+                echo "$output"
+            fi
+        else
+            echo "$output" >&2
+            return $exit_code
+        fi
+    }
+    
+    # Leave current directory if it's on the device, then unmount
+    umnt() {
+        if [[ $# -eq 0 ]]; then
+            echo "Usage: umnt <device>"
+            return 1
+        fi
+        
+        # Get the mount point for this device
+        local mount_point
+        mount_point=$(findmnt -n -o TARGET "$1" 2>/dev/null)
+        
+        # If we're currently in the mount point or a subdirectory, cd out
+        if [[ -n "$mount_point" && "$PWD" == "$mount_point"* ]]; then
+            echo "Leaving mount point: $mount_point"
+            cd "$HOME"
+        fi
+        
+        udisksctl unmount -b "$1"
+    }
+fi
