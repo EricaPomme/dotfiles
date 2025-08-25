@@ -13,6 +13,7 @@ xquartz                        # X11 server for macOS (required by some Unix app
 # Document Processing
 basictex                       # Minimal LaTeX distribution for PDF generation
 calibre                        # E-book library management and conversion tool
+obsidian                       # Knowledge management and note-taking with linked thought
 textsniper                     # Extract text from images using OCR technology
 
 # Media & Design  
