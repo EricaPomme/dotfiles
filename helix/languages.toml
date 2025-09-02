@@ -1,316 +1,353 @@
-# ────────────────────────────────────────────────────────────────────────────────
-# languages.toml — *everything commented out on purpose*
-# Start by uncommenting a single [[language]] block plus its server definition,
-# then reload Helix to test.  The “NOTE:” lines flag what changed from your
-# original file.
-# ────────────────────────────────────────────────────────────────────────────────
+# AWK
+[[language]]
+name = "awk"
+language-servers = ["awk-language-server"]
 
-# [[language]]
-# name = "awk"
-# language-servers = ["awk-language-server"]
+# Bash
+[[language]]
+name = "bash"
+language-servers = ["bash-language-server"]
+auto-format      = true
+formatter        = { command = "shfmt", args = ["-i", "4"] }
 
-# [[language]]
-# name = "bash"
-# language-servers = ["bash-language-server"]
-# auto-format      = true
-# formatter        = { command = "shfmt", args = ["-i", "4"] }
+# C
+[[language]]
+name = "c"
+language-servers = ["clangd"]
+auto-format      = true
+formatter        = { command = "clang-format", args = ["--style=LLVM"] }
 
-# [[language]]
-# name = "c"
-# language-servers = ["clangd"]
-# auto-format      = true
-# formatter        = { command = "clang-format", args = ["--style=LLVM"] }
+# C#
+[[language]]
+name = "c-sharp"
+language-servers = ["omnisharp"]
 
-# [[language]]
-# name = "c-sharp"
-# language-servers = ["omnisharp"]
+# C++
+[[language]]
+name = "cpp"
+language-servers = ["clangd"]
+auto-format      = true
+formatter        = { command = "clang-format", args = ["--style=LLVM"] }
 
-# [[language]]
-# name = "cmake"
-# language-servers = ["neocmakelsp", "cmake-language-server"]
+# CMake
+[[language]]
+name = "cmake"
+language-servers = ["neocmakelsp", "cmake-language-server"]
 
-# [[language]]
-# name = "cpp"
-# language-servers = ["clangd"]
-# auto-format      = true
-# formatter        = { command = "clang-format", args = ["--style=LLVM"] }
+# CSS
+[[language]]
+name = "css"
+language-servers = ["vscode-css-language-server"]
+auto-format      = true
 
-# [[language]]
-# name = "css"
-# language-servers = ["vscode-css-language-server"]
-# auto-format      = true
-# NOTE: rely on Prettier’s file‑type detection
-# formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
+# Docker Compose
+[[language]]
+name = "docker-compose"
 
-# [[language]]
-# name = "dockerfile"
-# language-servers = ["docker-langserver"]
+# Dockerfile
+[[language]]
+name = "dockerfile"
+language-servers = ["docker-langserver"]
 
-# [[language]]
-# name = "docker-compose"
-# NOTE: removed deprecated docker‑compose‑language‑service; use YAML LSP instead
-# language-servers = ["yaml-language-server"]
+# Fish
+[[language]]
+name = "fish"
+language-servers = ["fish-lsp"]
+auto-format      = true
+formatter        = { command = "fish_indent" }
 
-# [[language]]
-# name = "fish"
-# language-servers = ["fish-lsp"]
-# auto-format      = true
-# formatter        = { command = "fish_indent" }
+# Go
+[[language]]
+name = "go"
+language-servers = ["gopls"]  
+auto-format      = true
+formatter        = { command = "goimports" }
 
-# [[language]]
-# name = "go"
-# language-servers = ["gopls"]  # NOTE: golangci‑lint‑lsp removed to avoid dupes
-# auto-format      = true
-# formatter        = { command = "goimports" }
+# GraphQL
+[[language]]
+name = "graphql"
+language-servers = ["graphql-language-service-cli"]
 
-# [[language]]
-# name = "graphql"
-# language-servers = ["graphql-language-service-cli"]
+# HTML
+[[language]]
+name = "html"
+language-servers = ["vscode-html-language-server"]
+auto-format      = true
+formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
 
-# [[language]]
-# name = "haskell"
-# language-servers = ["haskell-language-server"]
+# Haskell
+[[language]]
+name = "haskell"
+language-servers = ["haskell-language-server"]
 
-# [[language]]
-# name = "html"
-# language-servers = ["vscode-html-language-server"]
-# auto-format      = true
-# formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
+# JSON
+[[language]]
+name = "json"
+language-servers = ["vscode-json-language-server"]
+auto-format      = true
+formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
 
-# [[language]]
-# name = "htmldjango"
-# NOTE: add HTML completions alongside Django tags
-# language-servers = ["djlsp", "vscode-html-language-server"]
+# Java
+[[language]]
+name = "java"
+language-servers = ["jdtls"]
 
-# [[language]]
-# name = "java"
-# language-servers = ["jdtls"]
+# JavaScript
+[[language]]
+name = "javascript"
+language-servers = ["typescript-language-server"]
+auto-format      = true
+formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
 
-# [[language]]
-# name = "javascript"
-# NOTE: keep a single server to avoid diagnostic spam
-# language-servers = ["typescript-language-server"]
-# auto-format      = true
-# formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
+# Kotlin
+[[language]]
+name = "kotlin"
+language-servers = ["kotlin-language-server"]
 
-# [[language]]
-# name = "json"
-# language-servers = ["vscode-json-language-server"]
-# auto-format      = true
-# formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
+# Make
+[[language]]
+name = "make"
+language-servers = []
+auto-format      = false
 
-# [[language]]
-# name = "kotlin"
-# language-servers = ["kotlin-language-server"]
+# Markdoc
+[[language]]
+name = "markdoc"
+language-servers = ["markdoc-ls"]
 
-# [[language]]
-# name = "make"
-# language-servers = []
-# auto-format      = false
+# Markdown
+[[language]]
+name = "markdown"
+language-servers = ["marksman"]
+auto-format      = true
+formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
 
-# [[language]]
-# name = "markdown"
-# NOTE: prefer Marksman; markdown-oxide removed
-# language-servers = ["marksman"]
-# auto-format      = true
-# formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
+# NASM
+[[language]]
+name = "nasm"
+language-servers = ["asm-lsp"]
 
-# [[language]]
-# name = "markdoc"
-# language-servers = ["markdoc-ls"]
+# Nix
+[[language]]
+name = "nix"
+language-servers = ["nil", "nixd"]
+auto-format      = true
+formatter        = { command = "nixpkgs-fmt" }
 
-# [[language]]
-# name = "nasm"
-# language-servers = ["asm-lsp"]
+# PKGBUILD
+[[language]]
+name = "pkgbuild"
 
-# [[language]]
-# name = "nix"
-# language-servers = ["nil", "nixd"]
-# auto-format      = true
-# formatter        = { command = "nixpkgs-fmt" }
+# Perl
+[[language]]
+name = "perl"
+language-servers = ["perlnavigator"]
 
-# [[language]]
-# name = "perl"
-# language-servers = ["perlnavigator"]
+# Python
+[[language]]
+name = "python"
+language-servers = ["pylsp", "ruff"]
+auto-format      = true
+formatter        = { command = "black", args = ["-"] }
 
-# [[language]]
-# name = "pkgbuild"
-# NOTE: still Bash‑based; limited PKGBUILD‑specific diagnostics
-# language-servers = ["bash-language-server"]
+# Ruby
+[[language]]
+name = "ruby"
+language-servers = ["ruby-lsp", "solargraph"]
+auto-format      = true
+formatter        = { command = "rubocop", args = ["--stdin", "{file}", "-A", "--stderr"] }
 
-# [[language]]
-# name = "python"
-# language-servers = ["pylsp", "ruff"]
-# auto-format      = true
-# formatter        = { command = "black", args = ["-"] }
+# Rust
+[[language]]
+name = "rust"
+language-servers = ["rust-analyzer"]
+auto-format      = true  # rustfmt via rust‑analyzer
 
-# [[language]]
-# name = "ruby"
-# language-servers = ["ruby-lsp", "solargraph"]
-# auto-format      = true
-# NOTE: use file placeholder so cops know real name
-# formatter        = { command = "rubocop", args = ["--stdin", "{file}", "-A", "--stderr"] }
+# Swift
+[[language]]
+name = "swift"
+language-servers = ["sourcekit-lsp"]
+auto-format      = true
+formatter        = { command = "swift-format" }
 
-# [[language]]
-# name = "rust"
-# language-servers = ["rust-analyzer"]
-# auto-format      = true  # rustfmt via rust‑analyzer
+# TOML
+[[language]]
+name = "toml"
+language-servers = ["taplo"]
+auto-format      = true
 
-# [[language]]
-# name = "swift"
-# language-servers = ["sourcekit-lsp"]
-# auto-format      = true
-# formatter        = { command = "swift-format" }
+# TypeScript
+[[language]]
+name = "typescript"
+language-servers = ["typescript-language-server"]  # eslint LSP removed
+auto-format      = true
+formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
 
-# [[language]]
-# name = "toml"
-# language-servers = ["taplo"]
-# auto-format      = true
+# XML
+[[language]]
+name = "xml"
+language-servers = []
+auto-format      = true
+formatter        = { command = "xmllint", args = ["--format", "-"] }
 
-# [[language]]
-# name = "typescript"
-# language-servers = ["typescript-language-server"]  # eslint LSP removed
-# auto-format      = true
-# formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
-
-# [[language]]
-# name = "xml"
-# language-servers = []
-# auto-format      = true
-# formatter        = { command = "xmllint", args = ["--format", "-"] }
-
-# [[language]]
-# name = "yaml"
-# language-servers = ["yaml-language-server", "ansible-language-server"]
-# auto-format      = true
-# formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
+# YAML
+[[language]]
+name = "yaml"
+language-servers = ["yaml-language-server", "ansible-language-server"]
+auto-format      = true
+formatter        = { command = "prettier", args = ["--stdin-filepath", "{file}"] }
 
 # ──────────────────────────
 # Language server definitions
 # ──────────────────────────
 
-# [language-server.awk-language-server]
-# command = "awk-language-server"
+# AWK Language Server
+[language-server.awk-language-server]
+command = "awk-language-server"
 
-# [language-server.bash-language-server]
-# command = "bash-language-server"
-# args    = ["start"]
+# Ansible Language Server
+[language-server.ansible-language-server]
+command = "ansible-language-server"
+args    = ["--stdio"]
 
-# [language-server.clangd]
-# command = "clangd"
-# args    = ["--background-index", "--clang-tidy", "--completion-style=detailed"]
+# Assembly LSP (NASM)
+[language-server.asm-lsp]
+command = "asm-lsp"
 
-# [language-server.omnisharp]
-# command = "omnisharp"
-# args    = ["--languageserver"]
+# Bash Language Server
+[language-server.bash-language-server]
+command = "bash-language-server"
+args    = ["start"]
 
-# [language-server.neocmakelsp]
-# command = "neocmakelsp"
-# args    = ["--stdio"]
+# CMake Language Server
+[language-server.cmake-language-server]
+command = "cmake-language-server"
 
-# [language-server.cmake-language-server]
-# command = "cmake-language-server"
+# Clangd (C/C++)
+[language-server.clangd]
+command = "clangd"
+args    = ["--background-index", "--clang-tidy", "--completion-style=detailed"]
 
-# [language-server.vscode-css-language-server]
-# command = "vscode-css-language-server"
-# args    = ["--stdio"]
+# Django LSP
+[language-server.djlsp]
+command = "djlsp"
 
-# [language-server.docker-langserver]
-# command = "docker-langserver"
-# args    = ["--stdio"]
+# Docker Language Server
+[language-server.docker-langserver]
+command = "docker-langserver"
+args    = ["--stdio"]
 
-# [language-server.yaml-language-server]
-# command = "yaml-language-server"
-# args    = ["--stdio"]
+# Fish LSP
+[language-server.fish-lsp]
+command = "fish-lsp"
+args    = ["start"]
 
-# # docker-compose-language-service removed — deprecated upstream
+# Go Language Server
+[language-server.gopls]
+command = "gopls"
 
-# [language-server.fish-lsp]
-# command = "fish-lsp"
-# args    = ["start"]
+# GraphQL Language Service
+[language-server.graphql-language-service-cli]
+command = "graphql-lsp"
+args    = ["server", "-m", "stream"]
 
-# [language-server.gopls]
-# command = "gopls"
+# Haskell Language Server
+[language-server.haskell-language-server]
+command = "haskell-language-server-wrapper"
+args    = ["--lsp"]
 
-# # golangci-lint-langserver removed to avoid duplicate diagnostics
+# Java Development Tools Language Server
+[language-server.jdtls]
+command = "jdtls"
 
-# [language-server.graphql-language-service-cli]
-# command = "graphql-lsp"
-# args    = ["server", "-m", "stream"]
+# Kotlin Language Server
+[language-server.kotlin-language-server]
+command = "kotlin-language-server"
 
-# [language-server.haskell-language-server]
-# command = "haskell-language-server-wrapper"
-# args    = ["--lsp"]
+# Markdoc Language Server
+[language-server.markdoc-ls]
+command = "markdoc-ls"
+args    = ["--stdio"]
 
-# [language-server.vscode-html-language-server]
-# command = "vscode-html-language-server"
-# args    = ["--stdio"]
+# Marksman (Markdown)
+[language-server.marksman]
+command = "marksman"
+args    = ["server"]
 
-# [language-server.djlsp]
-# command = "djlsp"
+# Neo CMake LSP
+[language-server.neocmakelsp]
+command = "neocmakelsp"
+args    = ["--stdio"]
 
-# [language-server.jdtls]
-# command = "jdtls"
+# Nix Daemon (nixd)
+[language-server.nixd]
+command = "nixd"
 
-# [language-server.typescript-language-server]
-# command = "typescript-language-server"
-# args    = ["--stdio"]
+# Nix Language Server
+[language-server.nil]
+command = "nil"
 
-# # vscode-eslint-language-server removed (dup diagnostics)
+# OmniSharp (C#)
+[language-server.omnisharp]
+command = "omnisharp"
+args    = ["--languageserver"]
 
-# [language-server.vscode-json-language-server]
-# command = "vscode-json-language-server"
-# args    = ["--stdio"]
+# Perl Navigator
+[language-server.perlnavigator]
+command = "perlnavigator"
+args    = ["--stdio"]
 
-# [language-server.kotlin-language-server]
-# command = "kotlin-language-server"
+# Python LSP Server
+[language-server.pylsp]
+command = "pylsp"
 
-# [language-server.marksman]
-# command = "marksman"
-# args    = ["server"]
+# Ruby LSP
+[language-server.ruby-lsp]
+command = "ruby-lsp"
 
-# # markdown-oxide removed
+# Ruff LSP (Python)
+[language-server.ruff]
+command = "ruff-lsp"
 
-# [language-server.markdoc-ls]
-# command = "markdoc-ls"
-# args    = ["--stdio"]
+# Rust Analyzer
+[language-server.rust-analyzer]
+command = "rust-analyzer"
 
-# [language-server.asm-lsp]
-# command = "asm-lsp"
+# Solargraph (Ruby)
+[language-server.solargraph]
+command = "solargraph"
+args    = ["stdio"]
 
-# [language-server.nil]
-# command = "nil"
+# SourceKit LSP (Swift)
+[language-server.sourcekit-lsp]
+command = "sourcekit-lsp"
 
-# [language-server.nixd]
-# command = "nixd"
+# Taplo (TOML)
+[language-server.taplo]
+command = "taplo"
+args    = ["lsp", "stdio"]
 
-# [language-server.perlnavigator]
-# command = "perlnavigator"
-# args    = ["--stdio"]
+# TypeScript Language Server
+[language-server.typescript-language-server]
+command = "typescript-language-server"
+args    = ["--stdio"]
 
-# [language-server.pylsp]
-# command = "pylsp"
+# VSCode CSS Language Server
+[language-server.vscode-css-language-server]
+command = "vscode-css-language-server"
+args    = ["--stdio"]
 
-# [language-server.ruff]
-# command = "ruff-lsp"
+# VSCode HTML Language Server
+[language-server.vscode-html-language-server]
+command = "vscode-html-language-server"
+args    = ["--stdio"]
 
-# [language-server.ruby-lsp]
-# command = "ruby-lsp"
+# VSCode JSON Language Server
+[language-server.vscode-json-language-server]
+command = "vscode-json-language-server"
+args    = ["--stdio"]
 
-# [language-server.solargraph]
-# command = "solargraph"
-# args    = ["stdio"]
-
-# [language-server.rust-analyzer]
-# command = "rust-analyzer"
-
-# [language-server.sourcekit-lsp]
-# command = "sourcekit-lsp"
-
-# [language-server.taplo]
-# command = "taplo"
-# args    = ["lsp", "stdio"]
-
-# [language-server.ansible-language-server]
-# command = "ansible-language-server"
-# args    = ["--stdio"]
+# YAML Language Server
+[language-server.yaml-language-server]
+command = "yaml-language-server"
+args    = ["--stdio"]
