@@ -82,15 +82,15 @@ DEBUG=true ./setup.sh install --debug
 
 ```
 dotfiles/
-├── setup.sh                 # Main entry point script
-├── .lib/                    # Modular libraries
-│   ├── core.sh             # Logging, OS detection, utilities
-│   ├── packages.sh         # Package manager handling
-│   ├── repos.sh            # Git repository management
-│   ├── dotfiles.sh         # Symlink management
-│   └── system.sh           # System configuration
-├── packagelists/           # Package definitions per manager
-│   ├── homebrew           # macOS packages
+├── setup.sh              # Main entry point script
+├── .lib/                 # Modular libraries
+│   ├── core.sh           # Logging, OS detection, utilities
+│   ├── packages.sh       # Package manager handling
+│   ├── repos.sh          # Git repository management
+│   ├── dotfiles.sh       # Symlink management
+│   └── system.sh         # System configuration
+├── packagelists/         # Package definitions per manager
+│   ├── homebrew          # macOS packages
 │   ├── deb               # Debian/Ubuntu packages
 │   ├── fedora            # Fedora/RHEL packages
 │   ├── pacman            # Arch Linux packages
@@ -98,17 +98,17 @@ dotfiles/
 │   ├── flatpak           # Flatpak applications
 │   ├── cargo             # Rust packages
 │   └── npm               # Node.js packages
-├── shell/                 # Shell configurations
+├── shell/                # Shell configurations
 │   ├── zshrc_macos       # macOS zsh configuration
 │   ├── zprofile_macos    # macOS zsh profile
 │   ├── zshrc_linux       # Linux zsh configuration
 │   ├── zprofile_linux    # Linux zsh profile
 │   ├── p10k.zsh          # Powerlevel10k theme
 │   ├── completions.zsh   # Custom completions
-│   ├── fzf.zsh          # FZF integration
-│   ├── alias_*.zsh      # Modular aliases
-│   └── *.zsh            # Various shell utilities
-├── git/                   # Git configuration
+│   ├── fzf.zsh           # FZF integration
+│   ├── alias_*.zsh       # Modular aliases
+│   └── *.zsh             # Various shell utilities
+├── git/                  # Git configuration
 │   └── gitconfig         # Global git settings
 ├── helix/                # Helix editor configuration
 ├── hammerspoon/          # Hammerspoon (macOS automation)
@@ -116,7 +116,6 @@ dotfiles/
 │   └── .tmux.conf.local  # Local tmux overrides
 ├── ssh/                  # SSH configuration templates
 └── scripts/              # Utility scripts
-    └── split-taggedblocks.sh  # SSH config management
 ```
 
 ## Configuration Files
@@ -245,17 +244,9 @@ BYPASS_SETUP_DOTFILES=true BYPASS_GIT_REPOS=true BYPASS_MACOS_DEFAULTS=true ./se
 - [ ] Add configuration file templates for new systems
 
 ### Low Priority
-- [ ] Add shell completion for setup.sh commands and flags
 - [ ] Implement configuration drift detection
 - [ ] Add support for encrypted dotfiles (GPG integration)
 - [ ] Create automated testing framework for different OS environments
-- [ ] Add telemetry/usage tracking for optimization insights
-- [ ] Implement plugin system for extending functionality
-- [ ] Add GUI wrapper for non-terminal users
 
 ### Nice to Have
-- [ ] Integration with dotfiles community repositories
-- [ ] Automated backup/restore of entire system state
-- [ ] Configuration synchronization across multiple machines
-- [ ] Web dashboard for monitoring dotfiles status
 - [ ] Integration with CI/CD for automated testing on commits
