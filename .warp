@@ -1,0 +1,129 @@
+# Dotfiles System v2.0.0 - Project Context
+
+This is a modular, cross-platform dotfiles management system that was completely revamped in September 2025.
+
+## Project Overview
+
+**Status**: ✅ Complete and deployed to main branch
+**Architecture**: Modular library-based system with `.lib/` modules
+**Entry Point**: `./setup.sh` with `install`, `update`, `cleanup` commands
+
+## System Architecture
+
+- **core.sh**: Logging, OS detection, bypass flags, utilities
+- **packages.sh**: Multi package manager support (brew, apt, dnf, pacman, nix, flatpak, cargo, npm)  
+- **repos.sh**: External git repository management (Prezto, oh-my-tmux)
+- **dotfiles.sh**: Smart symlink management with backup and validation
+- **system.sh**: OS-specific system configurations (macOS defaults, Linux/BSD stubs)
+- **setup.sh**: Main orchestrator with comprehensive CLI
+
+## Key Features
+
+- **Cross-platform**: macOS, Linux distributions, BSD variants
+- **Selective installation**: Granular bypass flags for each component
+- **Safe by default**: Validates tools, creates backups, idempotent operations
+- **Shell compatibility**: Works with bash 3.2+ and zsh
+- **Package consolidation**: Simplified package lists without `.packages` extensions
+
+## Development History
+
+**September 2025**: Complete system revamp
+- Replaced monolithic `install.sh`, `update.sh`, `cleanup.sh` with modular architecture
+- Removed dry-run complexity in favor of idempotent design
+- Added comprehensive bypass flags and error handling
+- Fixed critical symlink issues (shell configs were pointing to Prezto runcoms instead of custom files)
+- Added PATH safety and essential tool verification
+- Created comprehensive README.md documentation
+
+**Branches**:
+- `main`: Current modular v2.0.0 system (deployed)
+- `main-backup-legacy`: Original monolithic system backup
+- `rework-sep-2025`: Development branch (preserved)
+
+## Quick Commands
+
+```bash
+# Full installation
+./setup.sh install
+
+# Update everything  
+./setup.sh update
+
+# Clean package caches
+./setup.sh cleanup
+
+# Debug mode
+DEBUG=true ./setup.sh install --debug
+
+# Selective install (example)
+BYPASS_OS_PACKAGES=true BYPASS_CARGO=true ./setup.sh install
+```
+
+## Bypass Flags
+
+All bypass flags use format: `BYPASS_<COMPONENT>=true`
+- `BYPASS_VERIFY_ESSENTIALS` - Skip tool verification
+- `BYPASS_GIT_REPOS` - Skip repository operations  
+- `BYPASS_OS_PACKAGES` - Skip OS package installation
+- `BYPASS_CARGO` - Skip Rust packages
+- `BYPASS_NPM` - Skip Node.js packages
+- `BYPASS_SETUP_DOTFILES` - Skip symlink setup
+- `BYPASS_MACOS_DEFAULTS` - Skip macOS system settings
+- `BYPASS_OS_UPDATES` - Skip package updates
+
+## Testing & Validation
+
+```bash
+# Test symlink validation
+bash -c 'source .lib/core.sh && core_init && source .lib/dotfiles.sh && validate_dotfiles'
+
+# Test specific components in isolation
+BYPASS_VERIFY_ESSENTIALS=true BYPASS_OS_PACKAGES=true BYPASS_CARGO=true BYPASS_NPM=true BYPASS_GIT_REPOS=true BYPASS_MACOS_DEFAULTS=true ./setup.sh install
+```
+
+## Known Issues
+
+- **Cosmetic logging issue**: Output interleaving during full setup.sh runs (doesn't affect functionality)
+- **macOS ls alias**: Shell aliases use GNU-specific flags, need explicit `/bin/ls` in scripts
+
+## Key Files
+
+- `setup.sh` - Main entry point
+- `.lib/` - All module libraries
+- `packagelists/` - Package definitions (one per line, no extensions)
+- `shell/` - OS-specific shell configurations (`zshrc_macos`, `zprofile_macos`, etc.)
+- `README.md` - Comprehensive documentation
+- `.local/` - Git-ignored scratch space for development planning
+
+## Development Workflow
+
+1. Use bypass flags to test components in isolation
+2. Check debug output with `DEBUG=true`
+3. Validate symlinks after changes
+4. Test on clean systems when possible
+5. Update README.md for significant changes
+
+## Future Work (from TODO in README)
+
+**High Priority**:
+- Fix output interleaving issue 
+- Add validation command to CLI
+- Improve error recovery for symlink operations
+
+**Medium Priority**:
+- Windows PowerShell/WSL support
+- Linux desktop environment configs
+- BSD package manager support
+- Rollback functionality
+
+**Low Priority**:
+- Shell completion
+- Configuration drift detection  
+- Automated testing framework
+- Plugin system
+
+## Context Notes
+
+This system emphasizes **reliability over cleverness** - it's designed to be maintainable, debuggable, and safe to run repeatedly. The modular architecture makes it easy to extend and modify individual components without affecting the whole system.
+
+The revamp was successful in creating a robust foundation that can grow with changing needs while maintaining backward compatibility through the backup branch.
