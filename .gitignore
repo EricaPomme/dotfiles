@@ -18,3 +18,4 @@ ssh/config         # if you accidentally create a real config here
 # Git credentials and local overrides
 .git-credentials
 git/gitconfig.local
+.local/
