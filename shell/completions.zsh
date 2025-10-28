@@ -23,9 +23,13 @@ _update_completion() {
     command -v "$tool" > /dev/null 2>&1 || return
     
     # Generate if missing or older than 30 days
-    if [[ ! -f "$completion_file" ]] || [[ -n "$(find "$completion_file" -mtime +30 2>/dev/null)" ]]; then
-        if eval "$completion_cmd" > "$completion_file" 2>/dev/null; then
-            echo "Updated $tool completions"
+    if [[ ! -f "$completion_file" ]]; then
+        if eval "$completion_cmd" >| "$completion_file" 2>/dev/null; then
+            [[ $DEBUG == true ]] && echo "Generated $tool completions" >&2
+        fi
+    elif [[ -n "$(find "$completion_file" -mtime +30 2>/dev/null)" ]]; then
+        if eval "$completion_cmd" >| "$completion_file" 2>/dev/null; then
+            [[ $DEBUG == true ]] && echo "Refreshed $tool completions" >&2
         fi
     fi
 }
