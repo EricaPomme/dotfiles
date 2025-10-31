@@ -21,6 +21,7 @@ includes=(
   "shell/alias_tar.zsh"                # Tar with exclusions
   "shell/alias_helix.zsh"              # Helix editor aliases
   "shell/alias_eza.zsh"                # Pretty ls alternative + preferences
+  "shell/lock-keys.zsh"                # Lock key control
   "shell/completions.zsh"              # CLI tool completions
 )
 
