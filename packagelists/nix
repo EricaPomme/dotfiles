@@ -1,8 +1,0 @@
-# Basic packages for NixOS installs
-zsh
-git
-tmux
-neovim
-ripgrep
-fd
-bat

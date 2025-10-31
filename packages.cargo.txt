@@ -1,0 +1,6 @@
+up
+cargo-edit
+cargo-outdated
+cargo-update
+cargo-watch
+bandwhich

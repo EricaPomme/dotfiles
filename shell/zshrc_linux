@@ -16,7 +16,6 @@ LOADED_EXTRAS=()
 # Note that includes is using a tagging + relative path convention
 includes=(
   "shell/git_pull_nudge.zsh"           # Did you forget to pull? (Yes.)
-  "shell/weekly_update_check.zsh"      # Check for updates weekly
   "shell/fzf.zsh"                      # Fuzzy Finder
   "shell/alias_dots.zsh"               # Dots for to go up good and fastly
   "shell/alias_tar.zsh"                # Tar with exclusions

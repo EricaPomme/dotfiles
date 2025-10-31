@@ -1,0 +1,6 @@
+markdownlint-cli
+markdown-link-check
+npm-check-updates
+prettier
+http-server
+zx

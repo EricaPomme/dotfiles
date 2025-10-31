@@ -11,44 +11,43 @@ LOADED_EXTRAS=()
 # Source shell integrations and extras (interactive only)
 # Note that includes is using a tagging + relative path convention
 includes=(
-  "home/.iterm2_shell_integration.zsh" # iTerm2 shell integration
-  "home/.zprezto/init.zsh"             # Load prezto if we have it
-  "shell/alias_eza.zsh"                # Pretty ls alternative + preferences
-  "shell/alias_dots.zsh"               # Dots for to go up good and fastly
-  "shell/fzf.zsh"                      # Fuzzy Finder
-  "shell/alias_tar.zsh"                # Tar with exclusions
-  "shell/git_pull_nudge.zsh"           # Did you forget to pull? (Yes.)
-  "shell/weekly_update_check.zsh"      # Check for updates weekly
-  "shell/completions.zsh"              # CLI tool completions
+    "home/.iterm2_shell_integration.zsh" # iTerm2 shell integration
+    "home/.zprezto/init.zsh"             # Load prezto if we have it
+    "shell/alias_eza.zsh"                # Pretty ls alternative + preferences
+    "shell/alias_dots.zsh"               # Dots for to go up good and fastly
+    "shell/fzf.zsh"                      # Fuzzy Finder
+    "shell/alias_tar.zsh"                # Tar with exclusions
+    "shell/git_pull_nudge.zsh"           # Did you forget to pull? (Yes.)
+    "shell/completions.zsh"              # CLI tool completions
 )
 
 for rel_path in "${includes[@]}"; do
-  case $rel_path in
-  shell/*)
-    full_path="${HOME}/dotfiles/${rel_path}"
-    ;;
-  home/*)
-    full_path="${HOME}/${rel_path#home/}"
-    ;;
-  *)
-    full_path="${rel_path}"
-    ;;
-  esac
-  if [[ ! " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]] && [[ -f "$full_path" ]]; then
-    LOADED_EXTRAS+=("${full_path}")
-    source "$full_path"
-    if [[ $DEBUG == true ]] && [[ ! " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]]; then
-      echo "Loaded shell extra: ${full_path}"
+    case $rel_path in
+    shell/*)
+        full_path="${HOME}/dotfiles/${rel_path}"
+        ;;
+    home/*)
+        full_path="${HOME}/${rel_path#home/}"
+        ;;
+    *)
+        full_path="${rel_path}"
+        ;;
+    esac
+    if [[ ! " ${LOADED_EXTRAS[*]} " =~ " ${full_path} " ]] && [[ -f "$full_path" ]]; then
+        LOADED_EXTRAS+=("${full_path}")
+        source "$full_path"
+        if [[ $DEBUG == true ]] && [[ ! " ${LOADED_EXTRAS[*]} " =~ " ${full_path} " ]]; then
+            echo "Loaded shell extra: ${full_path}"
+        fi
+    else
+        if [[ $DEBUG == true ]]; then
+            if [[ ! -f "$full_path" ]]; then
+                echo "Skipping missing shell extra: ${full_path}"
+            elif [[ " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]]; then
+                echo "Skipping already loaded shell extra: ${full_path}"
+            fi
+        fi
     fi
-  else
-    if [[ $DEBUG == true ]]; then
-      if [[ ! -f "$full_path" ]]; then
-        echo "Skipping missing shell extra: ${full_path}"
-      elif [[ " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]]; then
-        echo "Skipping already loaded shell extra: ${full_path}"
-      fi
-    fi
-  fi
 done
 
 ## Aliases
@@ -62,13 +61,8 @@ alias gdu='gdu-go'
 
 # pdu (parallel disk usage) - better du replacement
 if command -v pdu &>/dev/null; then
-  alias du='pdu --top-down --progress --silent-errors'
+    alias du='pdu --top-down --progress --silent-errors'
 fi
-
-## Dotfiles Management
-# Quick update and install shortcuts
-alias dotfile-install='(cd ~/dotfiles && git pull && ./install.sh) || echo "Failed to pull or install"'
-alias dotfile-update='(cd ~/dotfiles && git pull && ./update.sh) || echo "Failed to pull or update"'
 
 ### Shell ----------------------------------------------------------------------
 ## Functions
@@ -76,16 +70,13 @@ alias dotfile-update='(cd ~/dotfiles && git pull && ./update.sh) || echo "Failed
 ipv4() { curl -4fsSL https://ifconfig.me; }
 
 ipv6() {
-  if command -v ip &>/dev/null; then
-    ip -6 addr show scope global | grep -oP '(?<=inet6 )[0-9A-Fa-f:]+' ||
-      ip -6 addr show scope link | grep -oP '(?<=inet6 )[0-9A-Fa-f:]+'
-  else
-    ifconfig | awk '/inet6/&&!/fe80/ {print $2}'
-  fi
+    if command -v ip &>/dev/null; then
+        ip -6 addr show scope global | grep -oP '(?<=inet6 )[0-9A-Fa-f:]+' ||
+            ip -6 addr show scope link | grep -oP '(?<=inet6 )[0-9A-Fa-f:]+'
+    else
+        ifconfig | awk '/inet6/&&!/fe80/ {print $2}'
+    fi
 }
-
-# UpNote piping
-upnote_add() { ~/dotfiles/scripts/upnote_add.py "$@" &>/dev/null; }
 
 ## Prompt
 # Custom prompt configuration
@@ -100,4 +91,3 @@ export PATH="$PATH:/Users/erica/.lmstudio/bin"
 ### Local ----------------------------------------------------------------------
 # User-specific overrides
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
-
