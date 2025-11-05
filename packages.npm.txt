@@ -4,3 +4,4 @@ npm-check-updates
 prettier
 http-server
 zx
+magic-wormhole

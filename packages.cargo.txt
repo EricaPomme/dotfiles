@@ -4,3 +4,4 @@ cargo-outdated
 cargo-update
 cargo-watch
 bandwhich
+magic-wormhole

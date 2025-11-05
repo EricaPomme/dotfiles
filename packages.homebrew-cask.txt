@@ -24,3 +24,4 @@ disk-inventory-x
 textsniper
 signal
 font-hack-nerd-font
+magic-wormhole

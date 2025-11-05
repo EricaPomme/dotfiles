@@ -16,3 +16,4 @@ org.telegram.desktop
 org.videolan.VLC
 org.signal.Signal
 io.github.gqrx.gqrx
+magic-wormhole
