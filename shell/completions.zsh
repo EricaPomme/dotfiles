@@ -58,6 +58,7 @@ _update_completion "rustup" "rustup completions zsh"
 # Modern CLI Tools
 _update_completion "bat" "bat --completion zsh"
 _update_completion "rg" "rg --generate=complete-zsh"
+_update_completion "codex" "codex completion zsh"
 # Note: fd doesn't support completion generation - relies on system packages
 
 # Package Managers (require user setup)
