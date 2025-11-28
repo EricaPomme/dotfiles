@@ -20,11 +20,9 @@ bind-key -n M-3 select-window -t 3
 bind-key -n M-4 select-window -t 4
 bind-key -n M-5 select-window -t 5
 
-# Split panes using | and -
-bind | split-window -h
-bind - split-window -v
-unbind '"'
-unbind %
+# Split panes using
+bind % split-window -h
+bind '"' split-window -v
 
 # Reload config
 bind r source-file ~/.tmux.conf \; display "Config reloaded!"
