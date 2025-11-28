@@ -7,7 +7,7 @@ PREVIEW_SCRIPT="${0:A:h}/fzfPreview.zsh"
 for cmd in fzf fd; do
     if ! command -v "$cmd" &>/dev/null; then
         echo "Required tool '$cmd' not found in PATH." >&2
-        exit 1
+        return 1
     fi
 done
 
