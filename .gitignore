@@ -19,3 +19,4 @@ ssh/config         # if you accidentally create a real config here
 .git-credentials
 git/gitconfig.local
 .local/
+.github/copilot-instructions.md
