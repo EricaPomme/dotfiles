@@ -12,7 +12,6 @@ LOADED_EXTRAS=()
 # Note that includes is using a tagging + relative path convention
 includes=(
     "home/.iterm2_shell_integration.zsh" # iTerm2 shell integration
-    "home/.zprezto/init.zsh"             # Load prezto if we have it
     "shell/alias_eza.zsh"                # Pretty ls alternative + preferences
     "shell/alias_dots.zsh"               # Dots for to go up good and fastly
     "shell/fzf.zsh"                      # Fuzzy Finder
@@ -40,12 +39,10 @@ for rel_path in "${includes[@]}"; do
             echo "Loaded shell extra: ${full_path}"
         fi
     else
-        if [[ $DEBUG == true ]]; then
-            if [[ ! -f "$full_path" ]]; then
-                echo "Skipping missing shell extra: ${full_path}"
-            elif [[ " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]]; then
-                echo "Skipping already loaded shell extra: ${full_path}"
-            fi
+        if [[ ! -f "$full_path" ]]; then
+            echo "Warning: Missing shell extra: ${full_path}" >&2
+        elif [[ $DEBUG == true ]] && [[ " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]]; then
+            echo "Skipping already loaded shell extra: ${full_path}"
         fi
     fi
 done
@@ -82,12 +79,6 @@ ipv6() {
 # Custom prompt configuration
 source "$HOME/dotfiles/shell/prompt.zsh"
 
-### External -------------------------------------------------------------------
-## LM Studio CLI
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/erica/.lmstudio/bin"
-# End of LM Studio CLI section
-
 ### Local ----------------------------------------------------------------------
 # User-specific overrides
-[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local" || true

@@ -15,42 +15,42 @@ LOADED_EXTRAS=()
 # Source shell integrations and extras (interactive only)
 # Note that includes is using a tagging + relative path convention
 includes=(
-  "shell/git_pull_nudge.zsh"           # Did you forget to pull? (Yes.)
-  "shell/fzf.zsh"                      # Fuzzy Finder
-  "shell/alias_dots.zsh"               # Dots for to go up good and fastly
-  "shell/alias_tar.zsh"                # Tar with exclusions
-  "shell/alias_helix.zsh"              # Helix editor aliases
-  "shell/alias_eza.zsh"                # Pretty ls alternative + preferences
-  "shell/lock-keys.zsh"                # Lock key control
-  "shell/completions.zsh"              # CLI tool completions
+    "shell/git_pull_nudge.zsh" # Did you forget to pull? (Yes.)
+    "shell/fzf.zsh"            # Fuzzy Finder
+    "shell/alias_dots.zsh"     # Dots for to go up good and fastly
+    "shell/alias_tar.zsh"      # Tar with exclusions
+    "shell/alias_helix.zsh"    # Helix editor aliases
+    "shell/alias_eza.zsh"      # Pretty ls alternative + preferences
+    "shell/lock-keys.zsh"      # Lock key control
+    "shell/completions.zsh"    # CLI tool completions
 )
 
 for rel_path in "${includes[@]}"; do
-  case $rel_path in
-  shell/*)
-    full_path="${HOME}/dotfiles/${rel_path}"
-    ;;
-  home/*)
-    full_path="${HOME}/${rel_path#home/}"
-    ;;
-  *)
-    full_path="${rel_path}"
-    ;;
-  esac
-  if [[ ! " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]] && [[ -f "$full_path" ]]; then
-    LOADED_EXTRAS+=("${full_path}")
-    [[ $DEBUG == true ]] && echo "Loading shell extra: ${full_path}"
-    source "$full_path"
-    [[ $DEBUG == true ]] && echo "Loaded shell extra: ${full_path}"
-  else
-    if [[ $DEBUG == true ]]; then
-      if [[ ! -f "$full_path" ]]; then
-        echo "Skipping missing shell extra: ${full_path}"
-      elif [[ " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]]; then
-        echo "Skipping already loaded shell extra: ${full_path}"
-      fi
+    case $rel_path in
+    shell/*)
+        full_path="${HOME}/dotfiles/${rel_path}"
+        ;;
+    home/*)
+        full_path="${HOME}/${rel_path#home/}"
+        ;;
+    *)
+        full_path="${rel_path}"
+        ;;
+    esac
+    if [[ ! " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]] && [[ -f "$full_path" ]]; then
+        LOADED_EXTRAS+=("${full_path}")
+        [[ $DEBUG == true ]] && echo "Loading shell extra: ${full_path}"
+        source "$full_path"
+        [[ $DEBUG == true ]] && echo "Loaded shell extra: ${full_path}"
+    else
+        if [[ $DEBUG == true ]]; then
+            if [[ ! -f "$full_path" ]]; then
+                echo "Skipping missing shell extra: ${full_path}"
+            elif [[ " ${LOADED_EXTRAS[@]} " =~ " ${full_path} " ]]; then
+                echo "Skipping already loaded shell extra: ${full_path}"
+            fi
+        fi
     fi
-  fi
 done
 
 ## Aliases
@@ -59,7 +59,7 @@ command -v eza &>/dev/null || alias l='ls -la'
 
 # pdu (parallel disk usage) - better du replacement
 if command -v pdu &>/dev/null; then
-  alias du='pdu --top-down --progress --silent-errors'
+    alias du='pdu --top-down --progress --silent-errors'
 fi
 
 ### Shell ----------------------------------------------------------------------
@@ -86,5 +86,4 @@ source "$HOME/dotfiles/shell/prompt.zsh"
 
 ### Local ----------------------------------------------------------------------
 # User-specific overrides
-[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
-export PATH="$HOME/.local/bin:$PATH"
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local" || true

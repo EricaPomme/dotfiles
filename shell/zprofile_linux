@@ -4,23 +4,28 @@
 ## Environment Variables
 typeset -U path
 
-# Local bin and scripts first
-[[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path)
-[[ -d "$HOME/dotfiles/scripts" ]] && path=("$HOME/dotfiles/scripts" $path)
+# Add standard Linux paths
+add_paths=(
+    # Local bin and scripts first
+    "$HOME/.local/bin"
+    "$HOME/dotfiles/scripts"
+    # Language-specific package managers
+    "$HOME/.cargo/bin"
+    "$HOME/.local/share/gem/ruby/3.4.0/bin"
+    # System-wide paths
+    "/opt/local/bin"
+    "/usr/local/bin"
+)
 
-# Language-specific package managers
-[[ -d "$HOME/.cargo/bin" ]] && path=("$HOME/.cargo/bin" $path)
-[[ -d "$HOME/.local/share/gem/ruby/3.4.0/bin" ]] && path=("$HOME/.local/share/gem/ruby/3.4.0/bin" $path)
-
-# System-wide paths
-[[ -d "/opt/local/bin" ]] && path=("/opt/local/bin" $path)
-[[ -d "/usr/local/bin" ]] && path=("/usr/local/bin" $path)
+for p in "${add_paths[@]}"; do
+    [[ -d "$p" ]] && path=("$p" $path)
+done
 
 export PATH
 
 ## Package Managers
 # pyenv setup
-if command -v pyenv > /dev/null 2>&1; then
+if command -v pyenv >/dev/null 2>&1; then
     export PYENV_ROOT="$HOME/.pyenv"
     [[ -d $PYENV_ROOT/bin ]] && path=("$PYENV_ROOT/bin" $path)
     eval "$(pyenv init -)"
@@ -29,7 +34,7 @@ fi
 ### Tools ----------------------------------------------------------------------
 ## Editor Settings
 # Primary editor selection
-if command -v hx > /dev/null 2>&1; then
+if command -v hx >/dev/null 2>&1; then
     export EDITOR="hx"
     alias e="hx"
 else
@@ -38,7 +43,7 @@ else
 fi
 
 # Visual editor for GUI contexts
-if command -v code > /dev/null 2>&1; then
+if command -v code >/dev/null 2>&1; then
     export VISUAL="code"
 else
     export VISUAL="$EDITOR"
@@ -59,11 +64,11 @@ if command -v udisksctl &>/dev/null; then
             echo "Usage: mnt <device>"
             return 1
         fi
-        
+
         local output
         output=$(udisksctl mount -b "$1" 2>&1)
         local exit_code=$?
-        
+
         if [[ $exit_code -eq 0 ]]; then
             # Extract mount point from output like "Mounted /dev/sda1 at /media/user/label"
             local mount_point
@@ -79,24 +84,24 @@ if command -v udisksctl &>/dev/null; then
             return $exit_code
         fi
     }
-    
+
     # Leave current directory if it's on the device, then unmount
     umnt() {
         if [[ $# -eq 0 ]]; then
             echo "Usage: umnt <device>"
             return 1
         fi
-        
+
         # Get the mount point for this device
         local mount_point
         mount_point=$(findmnt -n -o TARGET "$1" 2>/dev/null)
-        
+
         # If we're currently in the mount point or a subdirectory, cd out
         if [[ -n "$mount_point" && "$PWD" == "$mount_point"* ]]; then
             echo "Leaving mount point: $mount_point"
             cd "$HOME"
         fi
-        
+
         udisksctl unmount -b "$1"
     }
 fi
