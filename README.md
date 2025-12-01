@@ -23,22 +23,22 @@ This repo tracks package names for multiple managers:
 
 ```sh
 # Homebrew
-brew install $(cat packages.homebrew.txt)
-brew install --cask $(cat packages.homebrew-cask.txt)
+brew install $(cat packages.homebrew.txt | sed 's/#.*$//g')
+brew install --cask $(cat packages.homebrew-cask.txt | sed 's/#.*$//g')
 
 # Cargo
-cat packages.cargo.txt | xargs cargo install
+cargo install $(cat packages.cargo.txt | sed 's/#.*$//g')
 
 # npm (global)
-npm install -g $(cat packages.npm.txt)
+npm install -g $(cat packages.npm.txt | sed 's/#.*$//g')
 
 # Flatpak
-flatpak install -y $(cat packages.flatpak.txt)
+flatpak install -y $(cat packages.flatpak.txt | sed 's/#.*$//g')
 
 # Distro-specific
-sudo apt install -y $(cat packages.debian.txt)
-sudo dnf install -y $(cat packages.fedora.txt)
-sudo pacman -S --needed $(cat packages.archlinux.txt)
+sudo apt install -y $(cat packages.debian.txt | sed 's/#.*$//g')
+sudo dnf install -y $(cat packages.fedora.txt | sed 's/#.*$//g')
+sudo pacman -S --needed $(cat packages.archlinux.txt | sed 's/#.*$//g')
 ```
 
 ## Core tools (cross-platform baseline)
