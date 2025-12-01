@@ -21,6 +21,12 @@ This repo tracks package names for multiple managers:
 
 ### Read in package lists
 
+You can either run each manager manually as shown below, or use the shortcut script:
+
+```sh
+./packages.sh
+```
+
 ```sh
 # Homebrew
 brew install $(cat packages.homebrew.txt | sed 's/#.*$//g')
