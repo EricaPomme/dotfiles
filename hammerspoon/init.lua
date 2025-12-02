@@ -30,12 +30,20 @@ function openingAlert(app)
     hs.alert.showWithImage("Opening " .. name, nil, hs.screen.mainScreen(), OPENING_ALERT_DURATION)
 end
 
-function launcher(mode, mods, key, app)
+function launcher(mode, mods, key, app, args)
     local m = ({f13 = f13Mode, f14 = f14Mode, f15 = f15Mode})[mode]
     if not m then return end
     m:bind(mods, key, function()
         openingAlert(app)
-        hs.application.launchOrFocus(app)
+        if args and #args > 0 then
+            local cmd = "open -a '" .. app .. "'"
+            for _, arg in ipairs(args) do
+                cmd = cmd .. " --args '" .. arg .. "'"
+            end
+            hs.execute(cmd)
+        else
+            hs.application.launchOrFocus(app)
+        end
         modalActive[mode] = true
         m:exit()
     end)
@@ -154,6 +162,8 @@ f13Mode:bind({}, 'e', function()
     modalActive.f13 = true
     f13Mode:exit()
 end)
+
+launcher("f14", {}, ",", "/Applications/Firefox.app", {"--new-tab", "kagi.com"})
 
 -------------------------------------------------------------------------------
 -- Key Remaps
