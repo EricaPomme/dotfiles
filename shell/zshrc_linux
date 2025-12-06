@@ -23,6 +23,7 @@ includes=(
     "shell/alias_eza.zsh"      # Pretty ls alternative + preferences
     "shell/lock-keys.zsh"      # Lock key control
     "shell/completions.zsh"    # CLI tool completions
+    "shell/mktmpdir.zsh"       # mktempdir function
 )
 
 for rel_path in "${includes[@]}"; do

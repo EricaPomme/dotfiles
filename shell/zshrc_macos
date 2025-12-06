@@ -18,6 +18,7 @@ includes=(
     "shell/alias_tar.zsh"                # Tar with exclusions
     "shell/git_pull_nudge.zsh"           # Did you forget to pull? (Yes.)
     "shell/completions.zsh"              # CLI tool completions
+    "shell/mktmpdir.zsh"                 # mktempdir function
 )
 
 for rel_path in "${includes[@]}"; do
