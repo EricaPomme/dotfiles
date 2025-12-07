@@ -1,0 +1,19 @@
+# Modem-style disconnection message for shell logout
+
+# Generate some random modem garbage using full printable ASCII range
+generate_garbage() {
+    local length=$((RANDOM % 20 + 10))
+    local garbage=""
+    local byte
+    
+    for ((i=0; i<length; i++)); do
+        # Random printable ASCII: 0x20 (space) to 0x7E (~)
+        byte=$((RANDOM % 95 + 32))
+        garbage+=$(printf "\\$(printf '%03o' "$byte")")
+    done
+    
+    printf "%s" "$garbage"
+}
+
+printf "\033[1;32m%s" "$(generate_garbage)"
+printf "+++ NO CARRIER\033[0m\n"
