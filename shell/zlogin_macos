@@ -51,12 +51,12 @@ get_speed() {
             return
         fi
         
-        # For WiFi, try getting the current tx rate
-        if command -v /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport &>/dev/null; then
-            speed_val=$(/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I 2>/dev/null | grep 'lastTxRate:' | awk '{print $2}')
+        # For WiFi, try getting the current tx rate using wdutil (modern macOS)
+        if command -v wdutil &>/dev/null; then
+            speed_val=$(sudo wdutil info 2>/dev/null | grep -i 'tx rate' | head -n1 | grep -o '[0-9.]\+' | head -n1)
             if [[ -n "$speed_val" ]] && (( speed_val > 0 )); then
-                # Airport returns Mbps
-                printf "%d" "$((speed_val * 1000000))"
+                # wdutil returns Mbps (may have decimal)
+                printf "%d" "$(printf '%.0f' "$((speed_val * 1000000))")"
                 return
             fi
         fi
