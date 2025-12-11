@@ -2,7 +2,7 @@
 set -eu
 
 # Simple, portable symlink setup for dotfiles
-# - Manifest format: category|mode|source|target
+# - Manifest format: category|mode|chmod|user|group|source|target
 # - Categories: all, mac, linux, bsd
 # - No external dependencies; pure POSIX sh.
 
@@ -13,22 +13,17 @@ log_error() { printf 'ERROR: %s\n' "$*" >&2; }
 usage() {
     cat <<'EOF'
 Usage: ./setup.sh [--dry-run] [--manifest PATH]
-Create symlinks as declared in the manifest (default: symlinks.conf next to this script)
+Create symlinks as declared in the manifest (default: dotfiles.conf next to this script)
 
 Options:
   --dry-run        Show what would change; make no modifications
   --manifest PATH  Use a specific manifest path
   -h, --help       Show this help
-
-Manifest format:
-  category|mode|source_path|target_path
-  Categories: all, mac, linux, bsd
-  Lines starting with # are comments; blank lines are ignored.
 EOF
 }
 
 DRY_RUN=0
-MANIFEST="symlinks.conf"
+MANIFEST="dotfiles.conf"
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -82,6 +77,65 @@ backup_path() {
     printf '%s.%s.backup' "$1" "$ts"
 }
 
+validate_chmod_spec() {
+    spec=$1
+    [ "$spec" = "-" ] && return 0
+
+    # Accept octal 3-4 digits
+    printf '%s' "$spec" | grep -Eq '^[0-7]{3,4}$' && return 0
+
+    # Accept symbolic modes like u=rwX,go=rX
+    printf '%s' "$spec" | grep -Eq '^[ugoa]*([+-=][rwxXstugo]*)+(,[ugoa]*([+-=][rwxXstugo]*)+)*$' && return 0
+
+    return 1
+}
+
+user_exists() {
+    u=$1
+    [ "$u" = "-" ] && return 0
+    id -u "$u" >/dev/null 2>&1
+}
+
+group_exists() {
+    g=$1
+    [ "$g" = "-" ] && return 0
+    if command -v getent >/dev/null 2>&1; then
+        getent group "$g" >/dev/null 2>&1
+    else
+        dscl . -read "/Groups/$g" >/dev/null 2>&1
+    fi
+}
+
+apply_chown() {
+    user_spec=$1
+    group_spec=$2
+    tgt=$3
+
+    [ "$user_spec" = "-" ] && [ "$group_spec" = "-" ] && return 0
+
+    spec=""
+    if [ "$user_spec" != "-" ]; then
+        spec=$user_spec
+    fi
+    spec="$spec:"
+    if [ "$group_spec" != "-" ]; then
+        spec="${spec%:}:$group_spec"
+    fi
+
+    if [ "$DRY_RUN" -eq 0 ]; then
+        if chown "$spec" "$tgt" 2>/dev/null; then
+            return 0
+        fi
+        # fallback with sudo if available/needed
+        if command -v sudo >/dev/null 2>&1; then
+            sudo chown "$spec" "$tgt" 2>/dev/null && return 0
+        fi
+        log_error "Failed to chown $tgt to $spec"
+        FAILED=$((FAILED + 1))
+        return 1
+    fi
+}
+
 CREATED=0
 UPDATED=0
 BACKED_UP=0
@@ -92,12 +146,21 @@ TOTAL=0
 do_link() {
     src=$1
     tgt=$2
+    chmod_spec=$3
+    user_spec=$4
+    group_spec=$5
     TOTAL=$((TOTAL + 1))
 
     if [ ! -e "$src" ] && [ ! -L "$src" ]; then
         log_warn "Source missing, skipping: $src"
         SKIPPED=$((SKIPPED + 1))
         return 0
+    fi
+
+    if ! validate_chmod_spec "$chmod_spec"; then
+        log_error "Invalid chmod spec '$chmod_spec' for target: $tgt"
+        FAILED=$((FAILED + 1))
+        return 1
     fi
 
     parent=$(dirname "$tgt")
@@ -129,6 +192,10 @@ do_link() {
     log_info "Link: $tgt -> $src"
     if [ "$DRY_RUN" -eq 0 ]; then
         ln -s "$src" "$tgt" || { log_error "Failed to link: $tgt -> $src"; FAILED=$((FAILED + 1)); return 1; }
+        if [ "$chmod_spec" != "-" ] && [ -n "$chmod_spec" ]; then
+            chmod "$chmod_spec" "$tgt" || { log_error "Failed to chmod: $tgt"; FAILED=$((FAILED + 1)); return 1; }
+        fi
+        apply_chown "$user_spec" "$group_spec" "$tgt" || return 1
     fi
     CREATED=$((CREATED + 1))
 }
@@ -136,12 +203,21 @@ do_link() {
 do_copy() {
     src=$1
     tgt=$2
+    chmod_spec=$3
+    user_spec=$4
+    group_spec=$5
     TOTAL=$((TOTAL + 1))
 
     if [ ! -e "$src" ] && [ ! -L "$src" ]; then
         log_warn "Source missing, skipping: $src"
         SKIPPED=$((SKIPPED + 1))
         return 0
+    fi
+
+    if ! validate_chmod_spec "$chmod_spec"; then
+        log_error "Invalid chmod spec '$chmod_spec' for target: $tgt"
+        FAILED=$((FAILED + 1))
+        return 1
     fi
 
     parent=$(dirname "$tgt")
@@ -161,6 +237,88 @@ do_copy() {
         else
             cp "$src" "$tgt" || { log_error "Failed to copy: $src -> $tgt"; FAILED=$((FAILED + 1)); return 1; }
         fi
+        if [ "$chmod_spec" != "-" ] && [ -n "$chmod_spec" ]; then
+            chmod "$chmod_spec" "$tgt" || { log_error "Failed to chmod: $tgt"; FAILED=$((FAILED + 1)); return 1; }
+        fi
+        apply_chown "$user_spec" "$group_spec" "$tgt" || return 1
+    fi
+    CREATED=$((CREATED + 1))
+}
+
+do_newfile() {
+    src_rel=$1
+    tgt=$2
+    chmod_spec=$3
+    user_spec=$4
+    group_spec=$5
+    TOTAL=$((TOTAL + 1))
+
+    if [ "$src_rel" != "-" ]; then
+        log_warn "newfile mode ignores source; expected '-' but got: $src_rel"
+    fi
+
+    if ! validate_chmod_spec "$chmod_spec"; then
+        log_error "Invalid chmod spec '$chmod_spec' for target: $tgt"
+        FAILED=$((FAILED + 1))
+        return 1
+    fi
+
+    parent=$(dirname "$tgt")
+    ensure_parent "$parent" || { log_error "Failed to create parent: $parent"; FAILED=$((FAILED + 1)); return 1; }
+
+    if [ -e "$tgt" ] || [ -L "$tgt" ]; then
+        bkp=$(backup_path "$tgt")
+        log_info "Backup: $tgt -> $bkp"
+        [ "$DRY_RUN" -eq 0 ] && mv "$tgt" "$bkp"
+        BACKED_UP=$((BACKED_UP + 1))
+    fi
+
+    log_info "Create file: $tgt"
+    if [ "$DRY_RUN" -eq 0 ]; then
+        : > "$tgt" || { log_error "Failed to create file: $tgt"; FAILED=$((FAILED + 1)); return 1; }
+        if [ "$chmod_spec" != "-" ] && [ -n "$chmod_spec" ]; then
+            chmod "$chmod_spec" "$tgt" || { log_error "Failed to chmod: $tgt"; FAILED=$((FAILED + 1)); return 1; }
+        fi
+        apply_chown "$user_spec" "$group_spec" "$tgt" || return 1
+    fi
+    CREATED=$((CREATED + 1))
+}
+
+do_newdir() {
+    src_rel=$1
+    tgt=$2
+    chmod_spec=$3
+    user_spec=$4
+    group_spec=$5
+    TOTAL=$((TOTAL + 1))
+
+    if [ "$src_rel" != "-" ]; then
+        log_warn "newdir mode ignores source; expected '-' but got: $src_rel"
+    fi
+
+    if ! validate_chmod_spec "$chmod_spec"; then
+        log_error "Invalid chmod spec '$chmod_spec' for target: $tgt"
+        FAILED=$((FAILED + 1))
+        return 1
+    fi
+
+    parent=$(dirname "$tgt")
+    ensure_parent "$parent" || { log_error "Failed to create parent: $parent"; FAILED=$((FAILED + 1)); return 1; }
+
+    if [ -e "$tgt" ] || [ -L "$tgt" ]; then
+        bkp=$(backup_path "$tgt")
+        log_info "Backup: $tgt -> $bkp"
+        [ "$DRY_RUN" -eq 0 ] && mv "$tgt" "$bkp"
+        BACKED_UP=$((BACKED_UP + 1))
+    fi
+
+    log_info "Create dir: $tgt"
+    if [ "$DRY_RUN" -eq 0 ]; then
+        mkdir -p "$tgt" || { log_error "Failed to create dir: $tgt"; FAILED=$((FAILED + 1)); return 1; }
+        if [ "$chmod_spec" != "-" ] && [ -n "$chmod_spec" ]; then
+            chmod "$chmod_spec" "$tgt" || { log_error "Failed to chmod: $tgt"; FAILED=$((FAILED + 1)); return 1; }
+        fi
+        apply_chown "$user_spec" "$group_spec" "$tgt" || return 1
     fi
     CREATED=$((CREATED + 1))
 }
@@ -169,21 +327,27 @@ log_info "Dotfiles dir: $DOTFILES_DIR"
 log_info "Manifest: $MANIFEST_PATH"
 [ -n "$OS" ] && log_info "OS detected: $OS" || log_info "OS unknown; using 'all' entries only"
 
-# Read manifest: category|mode|source|target
+# Read manifest: category|mode|chmod|user|group|source|target
 while IFS= read -r line || [ -n "$line" ]; do
     case "$line" in ''|'#'*) continue ;; esac
 
-    # Parse four fields with '|' separators
+    # Parse seven fields with '|' separators
     catg=${line%%|*}
     rest=${line#*|}
     [ "$rest" = "$line" ] && { log_warn "Malformed line (no separators): $line"; continue; }
     mode=${rest%%|*}
     rest=${rest#*|}
+    chmod_spec=${rest%%|*}
+    rest=${rest#*|}
+    user_spec=${rest%%|*}
+    rest=${rest#*|}
+    group_spec=${rest%%|*}
+    rest=${rest#*|}
     src_rel=${rest%%|*}
     tgt_spec=${rest#*|}
 
-    if [ -z "$catg" ] || [ -z "$mode" ] || [ -z "$src_rel" ] || [ -z "$tgt_spec" ]; then
-        log_warn "Malformed line (need 4 fields): $line"
+    if [ -z "$catg" ] || [ -z "$mode" ] || [ -z "$chmod_spec" ] || [ -z "$user_spec" ] || [ -z "$group_spec" ] || [ -z "$src_rel" ] || [ -z "$tgt_spec" ]; then
+        log_warn "Malformed line (need 7 fields): $line"
         continue
     fi
 
@@ -192,12 +356,25 @@ while IFS= read -r line || [ -n "$line" ]; do
     if [ -n "$OS" ] && [ "$catg" = "$OS" ]; then process=1; fi
     [ "$process" -eq 1 ] || continue
 
+    if ! user_exists "$user_spec"; then
+        log_error "User not found: $user_spec"
+        FAILED=$((FAILED + 1))
+        continue
+    fi
+    if ! group_exists "$group_spec"; then
+        log_error "Group not found: $group_spec"
+        FAILED=$((FAILED + 1))
+        continue
+    fi
+
     src_abs="$DOTFILES_DIR/$src_rel"
     tgt_path=$(expand_tilde "$tgt_spec")
 
     case "$mode" in
-        link) do_link "$src_abs" "$tgt_path" ;;
-        copy) do_copy "$src_abs" "$tgt_path" ;;
+        link) do_link "$src_abs" "$tgt_path" "$chmod_spec" "$user_spec" "$group_spec" ;;
+        copy) do_copy "$src_abs" "$tgt_path" "$chmod_spec" "$user_spec" "$group_spec" ;;
+        newfile) do_newfile "$src_rel" "$tgt_path" "$chmod_spec" "$user_spec" "$group_spec" ;;
+        newdir) do_newdir "$src_rel" "$tgt_path" "$chmod_spec" "$user_spec" "$group_spec" ;;
         *) log_warn "Unknown mode '$mode', skipping: $line" ;;
     esac
 done < "$MANIFEST_PATH"
