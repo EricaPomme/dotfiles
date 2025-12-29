@@ -15,15 +15,16 @@ LOADED_EXTRAS=()
 # Source shell integrations and extras (interactive only)
 # Note that includes is using a tagging + relative path convention
 includes=(
-    "shell/git_pull_nudge.zsh" # Did you forget to pull? (Yes.)
-    "shell/fzf.zsh"            # Fuzzy Finder
-    "shell/alias_dots.zsh"     # Dots for to go up good and fastly
-    "shell/alias_tar.zsh"      # Tar with exclusions
-    "shell/alias_helix.zsh"    # Helix editor aliases
-    "shell/alias_eza.zsh"      # Pretty ls alternative + preferences
-    "shell/lock-keys.zsh"      # Lock key control
-    "shell/completions.zsh"    # CLI tool completions
-    "shell/mktmpdir.zsh"       # mktempdir function
+    "shell/alias_dots.zsh"          # Dots for to go up good and fastly
+    "shell/alias_eza.zsh"           # Pretty ls alternative + preferences
+    "shell/alias_helix.zsh"         # Helix editor aliases
+    "shell/alias_tar.zsh"           # Tar with exclusions
+    "shell/completions.zsh"         # CLI tool completions
+    "shell/fzf.zsh"                 # Fuzzy Finder
+    "shell/git_pull_background.zsh" # Git background pull updater
+    "shell/git_pull_nudge.zsh"      # Did you forget to pull? (Yes.)
+    "shell/lock-keys.zsh"           # Lock key control
+    "shell/mktmpdir.zsh"            # mktempdir function
 )
 
 for rel_path in "${includes[@]}"; do
