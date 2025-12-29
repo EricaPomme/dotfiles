@@ -2,7 +2,7 @@
 set -eu
 
 # Simple, portable symlink setup for dotfiles
-# - Manifest format: category|mode|chmod|user|group|source|target
+# - Manifest format: category|mode|noclobber|chmod|user|group|source|target
 # - Categories: all, mac, linux, bsd
 # - No external dependencies; pure POSIX sh.
 
@@ -146,9 +146,10 @@ TOTAL=0
 do_link() {
     src=$1
     tgt=$2
-    chmod_spec=$3
-    user_spec=$4
-    group_spec=$5
+    noclobber=$3
+    chmod_spec=$4
+    user_spec=$5
+    group_spec=$6
     TOTAL=$((TOTAL + 1))
 
     if [ ! -e "$src" ] && [ ! -L "$src" ]; then
@@ -173,6 +174,11 @@ do_link() {
             SKIPPED=$((SKIPPED + 1))
             return 0
         fi
+        if [ "$noclobber" -eq 1 ]; then
+            log_warn "Noclobber set and symlink exists, skipping: $tgt"
+            SKIPPED=$((SKIPPED + 1))
+            return 0
+        fi
         log_info "Replace symlink: $tgt (was -> $cur) now -> $src"
         if [ "$DRY_RUN" -eq 0 ]; then
             rm -f "$tgt" || { log_error "Failed to remove existing symlink: $tgt"; FAILED=$((FAILED + 1)); return 1; }
@@ -183,6 +189,11 @@ do_link() {
     fi
 
     if [ -e "$tgt" ]; then
+        if [ "$noclobber" -eq 1 ]; then
+            log_warn "Noclobber set and target exists, skipping: $tgt"
+            SKIPPED=$((SKIPPED + 1))
+            return 0
+        fi
         bkp=$(backup_path "$tgt")
         log_info "Backup: $tgt -> $bkp"
         [ "$DRY_RUN" -eq 0 ] && mv "$tgt" "$bkp"
@@ -203,9 +214,10 @@ do_link() {
 do_copy() {
     src=$1
     tgt=$2
-    chmod_spec=$3
-    user_spec=$4
-    group_spec=$5
+    noclobber=$3
+    chmod_spec=$4
+    user_spec=$5
+    group_spec=$6
     TOTAL=$((TOTAL + 1))
 
     if [ ! -e "$src" ] && [ ! -L "$src" ]; then
@@ -224,6 +236,11 @@ do_copy() {
     ensure_parent "$parent" || { log_error "Failed to create parent: $parent"; FAILED=$((FAILED + 1)); return 1; }
 
     if [ -e "$tgt" ] || [ -L "$tgt" ]; then
+        if [ "$noclobber" -eq 1 ]; then
+            log_warn "Noclobber set and target exists, skipping: $tgt"
+            SKIPPED=$((SKIPPED + 1))
+            return 0
+        fi
         bkp=$(backup_path "$tgt")
         log_info "Backup: $tgt -> $bkp"
         [ "$DRY_RUN" -eq 0 ] && mv "$tgt" "$bkp"
@@ -248,9 +265,10 @@ do_copy() {
 do_newfile() {
     src_rel=$1
     tgt=$2
-    chmod_spec=$3
-    user_spec=$4
-    group_spec=$5
+    noclobber=$3
+    chmod_spec=$4
+    user_spec=$5
+    group_spec=$6
     TOTAL=$((TOTAL + 1))
 
     if [ "$src_rel" != "-" ]; then
@@ -267,6 +285,11 @@ do_newfile() {
     ensure_parent "$parent" || { log_error "Failed to create parent: $parent"; FAILED=$((FAILED + 1)); return 1; }
 
     if [ -e "$tgt" ] || [ -L "$tgt" ]; then
+        if [ "$noclobber" -eq 1 ]; then
+            log_warn "Noclobber set and target exists, skipping: $tgt"
+            SKIPPED=$((SKIPPED + 1))
+            return 0
+        fi
         bkp=$(backup_path "$tgt")
         log_info "Backup: $tgt -> $bkp"
         [ "$DRY_RUN" -eq 0 ] && mv "$tgt" "$bkp"
@@ -287,9 +310,10 @@ do_newfile() {
 do_newdir() {
     src_rel=$1
     tgt=$2
-    chmod_spec=$3
-    user_spec=$4
-    group_spec=$5
+    noclobber=$3
+    chmod_spec=$4
+    user_spec=$5
+    group_spec=$6
     TOTAL=$((TOTAL + 1))
 
     if [ "$src_rel" != "-" ]; then
@@ -306,6 +330,11 @@ do_newdir() {
     ensure_parent "$parent" || { log_error "Failed to create parent: $parent"; FAILED=$((FAILED + 1)); return 1; }
 
     if [ -e "$tgt" ] || [ -L "$tgt" ]; then
+        if [ "$noclobber" -eq 1 ]; then
+            log_warn "Noclobber set and target exists, skipping: $tgt"
+            SKIPPED=$((SKIPPED + 1))
+            return 0
+        fi
         bkp=$(backup_path "$tgt")
         log_info "Backup: $tgt -> $bkp"
         [ "$DRY_RUN" -eq 0 ] && mv "$tgt" "$bkp"
@@ -327,15 +356,17 @@ log_info "Dotfiles dir: $DOTFILES_DIR"
 log_info "Manifest: $MANIFEST_PATH"
 [ -n "$OS" ] && log_info "OS detected: $OS" || log_info "OS unknown; using 'all' entries only"
 
-# Read manifest: category|mode|chmod|user|group|source|target
+# Read manifest: category|mode|noclobber|chmod|user|group|source|target
 while IFS= read -r line || [ -n "$line" ]; do
     case "$line" in ''|'#'*) continue ;; esac
 
-    # Parse seven fields with '|' separators
+    # Parse eight fields with '|' separators
     catg=${line%%|*}
     rest=${line#*|}
     [ "$rest" = "$line" ] && { log_warn "Malformed line (no separators): $line"; continue; }
     mode=${rest%%|*}
+    rest=${rest#*|}
+    noclobber=${rest%%|*}
     rest=${rest#*|}
     chmod_spec=${rest%%|*}
     rest=${rest#*|}
@@ -346,8 +377,8 @@ while IFS= read -r line || [ -n "$line" ]; do
     src_rel=${rest%%|*}
     tgt_spec=${rest#*|}
 
-    if [ -z "$catg" ] || [ -z "$mode" ] || [ -z "$chmod_spec" ] || [ -z "$user_spec" ] || [ -z "$group_spec" ] || [ -z "$src_rel" ] || [ -z "$tgt_spec" ]; then
-        log_warn "Malformed line (need 7 fields): $line"
+    if [ -z "$catg" ] || [ -z "$mode" ] || [ -z "$noclobber" ] || [ -z "$chmod_spec" ] || [ -z "$user_spec" ] || [ -z "$group_spec" ] || [ -z "$src_rel" ] || [ -z "$tgt_spec" ]; then
+        log_warn "Malformed line (need 8 fields): $line"
         continue
     fi
 
@@ -371,10 +402,10 @@ while IFS= read -r line || [ -n "$line" ]; do
     tgt_path=$(expand_tilde "$tgt_spec")
 
     case "$mode" in
-        link) do_link "$src_abs" "$tgt_path" "$chmod_spec" "$user_spec" "$group_spec" ;;
-        copy) do_copy "$src_abs" "$tgt_path" "$chmod_spec" "$user_spec" "$group_spec" ;;
-        newfile) do_newfile "$src_rel" "$tgt_path" "$chmod_spec" "$user_spec" "$group_spec" ;;
-        newdir) do_newdir "$src_rel" "$tgt_path" "$chmod_spec" "$user_spec" "$group_spec" ;;
+        link) do_link "$src_abs" "$tgt_path" "$noclobber" "$chmod_spec" "$user_spec" "$group_spec" ;;
+        copy) do_copy "$src_abs" "$tgt_path" "$noclobber" "$chmod_spec" "$user_spec" "$group_spec" ;;
+        newfile) do_newfile "$src_rel" "$tgt_path" "$noclobber" "$chmod_spec" "$user_spec" "$group_spec" ;;
+        newdir) do_newdir "$src_rel" "$tgt_path" "$noclobber" "$chmod_spec" "$user_spec" "$group_spec" ;;
         *) log_warn "Unknown mode '$mode', skipping: $line" ;;
     esac
 done < "$MANIFEST_PATH"
