@@ -144,7 +144,7 @@ end)
 
 -------------------------------------------------------------------------------
 -- Application Launchers
-launcher("f13", {}, "t", "/Applications/iTerm2.app")
+launcher("f13", {}, "t", "/Applications/iTerm.app")
 launcher("f13", {}, "o", "/Applications/1Password.app")
 launcher("f13", {}, "w", "/Applications/Firefox.app")
 launcher("f13", {}, "`", "/Applications/UpNote.app")
