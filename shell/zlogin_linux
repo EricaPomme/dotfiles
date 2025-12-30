@@ -72,3 +72,4 @@ local speed=$(get_speed)
 
 printf "\033[1;32mCONNECT %s\033[0m\n" "$speed"
 printf "Connected to \033[1;36m%s\033[0m at \033[1;33m%s\033[0m bps\n" "$host" "$speed"
+return
