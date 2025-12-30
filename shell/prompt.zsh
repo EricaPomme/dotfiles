@@ -191,6 +191,7 @@ case "$distro" in
     centos)         icon='\uf304' ;;
     opensuse*|suse*)icon='\uf314' ;;
     darwin)         icon='\uf179' ;;
+    cachyos)        icon='\uf303' ;;
     *)              icon=' '      ;;
 esac
 
