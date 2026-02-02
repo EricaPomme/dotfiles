@@ -3,8 +3,6 @@ yubikey-manager
 python
 python-pip
 python-virtualenv
-pipx
-rust
 sccache
 go
 helix
@@ -18,7 +16,7 @@ rsync
 zip
 unzip
 xz
-p7zip
+7zip
 ripgrep
 fd
 findutils
@@ -28,13 +26,11 @@ eza
 bat
 lnav
 gdu
-tldr
 jq
 curl
 wget
 whois
 traceroute
-ssh-copy-id
 tree
 htop
 fastfetch
@@ -49,11 +45,9 @@ iperf3
 fail2ban
 strace
 docker
-docker-completion
 virt-manager
 flatpak
 pamac-aur
-node
 imagemagick
 networkmanager
 mobile-broadband-provider-info
