@@ -7,6 +7,7 @@ unsetopt monitor
     setopt local_options nomonitor # avoid job-control chatter in this subshell only
 
     repos=(
+		"$HOME/.tmux"
         "$HOME/.ssh"
         "$HOME/dotfiles"
     )

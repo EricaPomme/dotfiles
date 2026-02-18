@@ -7,12 +7,13 @@ typeset -U path
 # Add standard macOS paths
 add_paths=(
     # Local bin and scripts first
-    $HOME/.local/bin
-    $HOME/dotfiles/scripts
-    $HOME/.cargo/bin
+    "$HOME/.local/bin"
+    "$HOME/dotfiles/scripts"
+    "$HOME/.cargo/bin"
     # Homebrew paths, GNU coreutils
-    /opt/homebrew/bin
-    /opt/homebrew/opt/coreutils/libexec/gnubin
+    "$(brew --prefix openssh)"
+    "/opt/homebrew/bin"
+    "/opt/homebrew/opt/coreutils/libexec/gnubin"
 )
 
 for p in "${add_paths[@]}"; do
