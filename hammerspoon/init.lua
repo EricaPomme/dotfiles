@@ -146,7 +146,7 @@ end)
 -- Application Launchers
 launcher("f13", {}, "t", "/Applications/iTerm.app")
 launcher("f13", {}, "o", "/Applications/1Password.app")
-launcher("f13", {}, "w", "/Applications/Firefox.app")
+launcher("f13", {}, "w", "/Applications/Safari.app")
 launcher("f13", {}, "`", "/Applications/UpNote.app")
 launcher("f13", {}, "1", "/Applications/Telegram.app")
 launcher("f13", {}, "2", "/Applications/Discord.app")
@@ -163,7 +163,7 @@ f13Mode:bind({}, 'e', function()
     f13Mode:exit()
 end)
 
-launcher("f14", {}, ",", "/Applications/Firefox.app", {"--new-tab", "kagi.com"})
+launcher("f14", {}, ",", "/Applications/Safari.app", {"--new-tab", "kagi.com"})
 
 -------------------------------------------------------------------------------
 -- Key Remaps
@@ -171,6 +171,9 @@ keystroke("f13", {}, "left",  {}, "home", false)
 keystroke("f13", {}, "right", {}, "end", false)
 keystroke("f13", {}, "up",    {}, "pageup", false)
 keystroke("f13", {}, "down",  {}, "pagedown", false)
+
+keystroke("f13", {}, "a", {"cmd", "shift"}, "3")
+keystroke("f13", {}, "s", {"cmd", "shift"}, "4")
 
 -------------------------------------------------------------------------------
 -- Text Macros
@@ -199,6 +202,19 @@ end)
 
 -------------------------------------------------------------------------------
 -- URL Cleaner
+-- How to add a cleaner:
+-- 1) Add a new table entry to `urlHandlers` with:
+--    - `name`: human-readable label.
+--    - `match(url)`: returns truthy when this handler should process the URL.
+--    - `transform(url)`: returns the cleaned URL.
+-- 2) Keep `match` specific enough to avoid false positives.
+-- 3) Put more specific handlers before generic ones.
+--
+-- Runtime flow (f13 + v):
+-- - Reads URL from clipboard.
+-- - Iterates handlers in order and applies the first `match`.
+-- - If none match, falls back to generic cleanup (strip query + trailing `/`).
+-- - If changed, writes cleaned URL back to clipboard and pastes it.
 local urlHandlers = {
     {
         name = "Bluesky",
