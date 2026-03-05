@@ -62,7 +62,7 @@ fi
 # udisks convenience functions
 if command -v udisksctl &>/dev/null; then
     # Mount device and cd to mount point
-    mnt() {
+    function mnt() {
         if [[ $# -eq 0 ]]; then
             echo "Usage: mnt <device>"
             return 1
@@ -89,7 +89,7 @@ if command -v udisksctl &>/dev/null; then
     }
 
     # Leave current directory if it's on the device, then unmount
-    umnt() {
+    function umnt() {
         if [[ $# -eq 0 ]]; then
             echo "Usage: umnt <device>"
             return 1
