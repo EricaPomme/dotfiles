@@ -61,11 +61,23 @@ fi
 # -----------------------------------------------------------------------------
 # udisks convenience functions
 if command -v udisksctl &>/dev/null; then
-    # Mount device and cd to mount point
+    # Mount device and cd to mount point.
+    # With no arguments, lists unmounted mountable volumes.
     function mnt() {
         if [[ $# -eq 0 ]]; then
-            echo "Usage: mnt <device>"
-            return 1
+            printf "%-16s %8s  %-5s  %-10s  %-15s  %-5s  %-22s  %s\n" \
+                "DEVICE" "SIZE" "TYPE" "FSTYPE" "LABEL" "IFACE" "MODEL" "SERIAL"
+            printf '%.0s-' {1..90}; echo
+
+            local NAME SIZE TYPE FSTYPE LABEL TRAN MODEL SERIAL MOUNTPOINT
+            while IFS= read -r line; do
+                eval "$line"
+                [[ -n "$FSTYPE" && -z "$MOUNTPOINT" ]] || continue
+                printf "%-16s %8s  %-5s  %-10s  %-15s  %-5s  %-22s  %s\n" \
+                    "/dev/$NAME" "$SIZE" "$TYPE" "$FSTYPE" \
+                    "${LABEL:--}" "${TRAN:--}" "$MODEL" "$SERIAL"
+            done < <(lsblk -Po NAME,SIZE,TYPE,FSTYPE,LABEL,TRAN,MODEL,SERIAL,MOUNTPOINT 2>/dev/null)
+            return 0
         fi
 
         local output
@@ -88,11 +100,26 @@ if command -v udisksctl &>/dev/null; then
         fi
     }
 
-    # Leave current directory if it's on the device, then unmount
+    # Leave current directory if it's on the device, then unmount.
+    # With no arguments, lists volumes currently mounted by udisks2.
     function umnt() {
         if [[ $# -eq 0 ]]; then
-            echo "Usage: umnt <device>"
-            return 1
+            printf "%-16s  %-35s  %-10s  %8s  %s\n" \
+                "DEVICE" "MOUNT POINT" "FSTYPE" "SIZE" "LABEL"
+            printf '%.0s-' {1..85}; echo
+
+            local NAME SIZE TYPE FSTYPE LABEL MOUNTPOINT
+            local found=0
+            while IFS= read -r line; do
+                eval "$line"
+                [[ "$MOUNTPOINT" == /run/media/* ]] || continue
+                found=1
+                printf "%-16s  %-35s  %-10s  %8s  %s\n" \
+                    "/dev/$NAME" "$MOUNTPOINT" "$FSTYPE" "$SIZE" "${LABEL:--}"
+            done < <(lsblk -Po NAME,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINT 2>/dev/null)
+
+            [[ $found -eq 0 ]] && echo "(none)"
+            return 0
         fi
 
         # Get the mount point for this device
