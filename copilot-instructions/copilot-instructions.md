@@ -28,7 +28,14 @@ current and useful:
   preference -- mention it and ask whether it should be promoted to a global
   rule.
 
-When updating these files, always update both and commit the change.
+When updating these files:
+
+1. Update both files in this repo (`copilot-instructions.md` and
+   `global.instructions.md`).
+2. Check whether the counterpart repo exists on this system (`~/dotfiles-win`).
+3. If found, pull it to get the latest version, then apply the same changes
+   there too.
+4. Commit and push each repo after updating it.
 
 ---
 
