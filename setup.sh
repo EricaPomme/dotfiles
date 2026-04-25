@@ -6,9 +6,19 @@ set -eu
 # - Categories: all, mac, linux, bsd
 # - No external dependencies; pure POSIX sh.
 
-log_info() { printf 'INFO: %s\n' "$*" >&2; }
-log_warn() { printf 'WARN: %s\n' "$*" >&2; }
-log_error() { printf 'ERROR: %s\n' "$*" >&2; }
+log_info()  { printf '%s\n' "${_c_ok}info${_c_rst}   $*" >&2; }
+log_warn()  { printf '%s\n' "${_c_warn}warn${_c_rst}   $*" >&2; }
+log_error() { printf '%s\n' "${_c_err}error${_c_rst}  $*" >&2; }
+
+# Color only when stderr is a terminal
+if [ -t 2 ]; then
+    _c_ok=$(printf '\033[32m')
+    _c_warn=$(printf '\033[33m')
+    _c_err=$(printf '\033[31m')
+    _c_rst=$(printf '\033[0m')
+else
+    _c_ok='' _c_warn='' _c_err='' _c_rst=''
+fi
 
 usage() {
     cat <<'EOF'
@@ -113,20 +123,20 @@ apply_chown() {
 
     [ "$user_spec" = "-" ] && [ "$group_spec" = "-" ] && return 0
 
-    spec=""
-    if [ "$user_spec" != "-" ]; then
-        spec=$user_spec
-    fi
-    spec="$spec:"
-    if [ "$group_spec" != "-" ]; then
-        spec="${spec%:}:$group_spec"
+    # Build chown spec: user:group, :group, or user: (trailing colon = keep existing group)
+    if [ "$user_spec" = "-" ]; then
+        spec=":${group_spec}"
+    elif [ "$group_spec" = "-" ]; then
+        spec="${user_spec}:"
+    else
+        spec="${user_spec}:${group_spec}"
     fi
 
     if [ "$DRY_RUN" -eq 0 ]; then
         if chown "$spec" "$tgt" 2>/dev/null; then
             return 0
         fi
-        # fallback with sudo if available/needed
+        # Fallback to sudo if available
         if command -v sudo >/dev/null 2>&1; then
             sudo chown "$spec" "$tgt" 2>/dev/null && return 0
         fi
@@ -143,6 +153,57 @@ SKIPPED=0
 FAILED=0
 TOTAL=0
 
+# Validate the chmod spec and ensure the target's parent directory exists.
+# Increments FAILED and returns 1 on error.
+_validate_and_prepare() {
+    _vp_chmod=$1
+    _vp_tgt=$2
+
+    if ! validate_chmod_spec "$_vp_chmod"; then
+        log_error "Invalid chmod spec '$_vp_chmod' for target: $_vp_tgt"
+        FAILED=$((FAILED + 1))
+        return 1
+    fi
+
+    _vp_parent=$(dirname "$_vp_tgt")
+    ensure_parent "$_vp_parent" || { log_error "Failed to create parent: $_vp_parent"; FAILED=$((FAILED + 1)); return 1; }
+}
+
+# Back up an existing target unless noclobber is set.
+# Returns 1 to signal the caller should skip (noclobber active); 0 to proceed.
+_maybe_backup() {
+    _mb_tgt=$1
+    _mb_nc=$2
+
+    if [ -e "$_mb_tgt" ] || [ -L "$_mb_tgt" ]; then
+        if [ "$_mb_nc" -eq 1 ]; then
+            log_warn "Noclobber set and target exists, skipping: $_mb_tgt"
+            SKIPPED=$((SKIPPED + 1))
+            return 1
+        fi
+        _mb_bkp=$(backup_path "$_mb_tgt")
+        log_info "Backup: $_mb_tgt -> $_mb_bkp"
+        [ "$DRY_RUN" -eq 0 ] && mv "$_mb_tgt" "$_mb_bkp"
+        BACKED_UP=$((BACKED_UP + 1))
+    fi
+    return 0
+}
+
+# Apply chmod and chown to a target after it has been created or linked.
+_apply_postop() {
+    _ap_chmod=$1
+    _ap_user=$2
+    _ap_group=$3
+    _ap_tgt=$4
+
+    [ "$DRY_RUN" -eq 1 ] && return 0
+
+    if [ "$_ap_chmod" != "-" ] && [ -n "$_ap_chmod" ]; then
+        chmod "$_ap_chmod" "$_ap_tgt" || { log_error "Failed to chmod: $_ap_tgt"; FAILED=$((FAILED + 1)); return 1; }
+    fi
+    apply_chown "$_ap_user" "$_ap_group" "$_ap_tgt" || return 1
+}
+
 do_link() {
     src=$1
     tgt=$2
@@ -158,14 +219,7 @@ do_link() {
         return 0
     fi
 
-    if ! validate_chmod_spec "$chmod_spec"; then
-        log_error "Invalid chmod spec '$chmod_spec' for target: $tgt"
-        FAILED=$((FAILED + 1))
-        return 1
-    fi
-
-    parent=$(dirname "$tgt")
-    ensure_parent "$parent" || { log_error "Failed to create parent: $parent"; FAILED=$((FAILED + 1)); return 1; }
+    _validate_and_prepare "$chmod_spec" "$tgt" || return 1
 
     if [ -L "$tgt" ]; then
         cur=$(readlink "$tgt" 2>/dev/null || printf '')
@@ -188,26 +242,11 @@ do_link() {
         return 0
     fi
 
-    if [ -e "$tgt" ]; then
-        if [ "$noclobber" -eq 1 ]; then
-            log_warn "Noclobber set and target exists, skipping: $tgt"
-            SKIPPED=$((SKIPPED + 1))
-            return 0
-        fi
-        bkp=$(backup_path "$tgt")
-        log_info "Backup: $tgt -> $bkp"
-        [ "$DRY_RUN" -eq 0 ] && mv "$tgt" "$bkp"
-        BACKED_UP=$((BACKED_UP + 1))
-    fi
+    _maybe_backup "$tgt" "$noclobber" || return 0
 
     log_info "Link: $tgt -> $src"
-    if [ "$DRY_RUN" -eq 0 ]; then
-        ln -s "$src" "$tgt" || { log_error "Failed to link: $tgt -> $src"; FAILED=$((FAILED + 1)); return 1; }
-        if [ "$chmod_spec" != "-" ] && [ -n "$chmod_spec" ]; then
-            chmod "$chmod_spec" "$tgt" || { log_error "Failed to chmod: $tgt"; FAILED=$((FAILED + 1)); return 1; }
-        fi
-        apply_chown "$user_spec" "$group_spec" "$tgt" || return 1
-    fi
+    [ "$DRY_RUN" -eq 0 ] && { ln -s "$src" "$tgt" || { log_error "Failed to link: $tgt -> $src"; FAILED=$((FAILED + 1)); return 1; }; }
+    _apply_postop "$chmod_spec" "$user_spec" "$group_spec" "$tgt" || return 1
     CREATED=$((CREATED + 1))
 }
 
@@ -226,26 +265,8 @@ do_copy() {
         return 0
     fi
 
-    if ! validate_chmod_spec "$chmod_spec"; then
-        log_error "Invalid chmod spec '$chmod_spec' for target: $tgt"
-        FAILED=$((FAILED + 1))
-        return 1
-    fi
-
-    parent=$(dirname "$tgt")
-    ensure_parent "$parent" || { log_error "Failed to create parent: $parent"; FAILED=$((FAILED + 1)); return 1; }
-
-    if [ -e "$tgt" ] || [ -L "$tgt" ]; then
-        if [ "$noclobber" -eq 1 ]; then
-            log_warn "Noclobber set and target exists, skipping: $tgt"
-            SKIPPED=$((SKIPPED + 1))
-            return 0
-        fi
-        bkp=$(backup_path "$tgt")
-        log_info "Backup: $tgt -> $bkp"
-        [ "$DRY_RUN" -eq 0 ] && mv "$tgt" "$bkp"
-        BACKED_UP=$((BACKED_UP + 1))
-    fi
+    _validate_and_prepare "$chmod_spec" "$tgt" || return 1
+    _maybe_backup "$tgt" "$noclobber" || return 0
 
     log_info "Copy: $src -> $tgt"
     if [ "$DRY_RUN" -eq 0 ]; then
@@ -254,11 +275,8 @@ do_copy() {
         else
             cp "$src" "$tgt" || { log_error "Failed to copy: $src -> $tgt"; FAILED=$((FAILED + 1)); return 1; }
         fi
-        if [ "$chmod_spec" != "-" ] && [ -n "$chmod_spec" ]; then
-            chmod "$chmod_spec" "$tgt" || { log_error "Failed to chmod: $tgt"; FAILED=$((FAILED + 1)); return 1; }
-        fi
-        apply_chown "$user_spec" "$group_spec" "$tgt" || return 1
     fi
+    _apply_postop "$chmod_spec" "$user_spec" "$group_spec" "$tgt" || return 1
     CREATED=$((CREATED + 1))
 }
 
@@ -271,39 +289,14 @@ do_newfile() {
     group_spec=$6
     TOTAL=$((TOTAL + 1))
 
-    if [ "$src_rel" != "-" ]; then
-        log_warn "newfile mode ignores source; expected '-' but got: $src_rel"
-    fi
+    [ "$src_rel" != "-" ] && log_warn "newfile mode ignores source; expected '-' but got: $src_rel"
 
-    if ! validate_chmod_spec "$chmod_spec"; then
-        log_error "Invalid chmod spec '$chmod_spec' for target: $tgt"
-        FAILED=$((FAILED + 1))
-        return 1
-    fi
-
-    parent=$(dirname "$tgt")
-    ensure_parent "$parent" || { log_error "Failed to create parent: $parent"; FAILED=$((FAILED + 1)); return 1; }
-
-    if [ -e "$tgt" ] || [ -L "$tgt" ]; then
-        if [ "$noclobber" -eq 1 ]; then
-            log_warn "Noclobber set and target exists, skipping: $tgt"
-            SKIPPED=$((SKIPPED + 1))
-            return 0
-        fi
-        bkp=$(backup_path "$tgt")
-        log_info "Backup: $tgt -> $bkp"
-        [ "$DRY_RUN" -eq 0 ] && mv "$tgt" "$bkp"
-        BACKED_UP=$((BACKED_UP + 1))
-    fi
+    _validate_and_prepare "$chmod_spec" "$tgt" || return 1
+    _maybe_backup "$tgt" "$noclobber" || return 0
 
     log_info "Create file: $tgt"
-    if [ "$DRY_RUN" -eq 0 ]; then
-        : > "$tgt" || { log_error "Failed to create file: $tgt"; FAILED=$((FAILED + 1)); return 1; }
-        if [ "$chmod_spec" != "-" ] && [ -n "$chmod_spec" ]; then
-            chmod "$chmod_spec" "$tgt" || { log_error "Failed to chmod: $tgt"; FAILED=$((FAILED + 1)); return 1; }
-        fi
-        apply_chown "$user_spec" "$group_spec" "$tgt" || return 1
-    fi
+    [ "$DRY_RUN" -eq 0 ] && { : > "$tgt" || { log_error "Failed to create file: $tgt"; FAILED=$((FAILED + 1)); return 1; }; }
+    _apply_postop "$chmod_spec" "$user_spec" "$group_spec" "$tgt" || return 1
     CREATED=$((CREATED + 1))
 }
 
@@ -316,39 +309,14 @@ do_newdir() {
     group_spec=$6
     TOTAL=$((TOTAL + 1))
 
-    if [ "$src_rel" != "-" ]; then
-        log_warn "newdir mode ignores source; expected '-' but got: $src_rel"
-    fi
+    [ "$src_rel" != "-" ] && log_warn "newdir mode ignores source; expected '-' but got: $src_rel"
 
-    if ! validate_chmod_spec "$chmod_spec"; then
-        log_error "Invalid chmod spec '$chmod_spec' for target: $tgt"
-        FAILED=$((FAILED + 1))
-        return 1
-    fi
-
-    parent=$(dirname "$tgt")
-    ensure_parent "$parent" || { log_error "Failed to create parent: $parent"; FAILED=$((FAILED + 1)); return 1; }
-
-    if [ -e "$tgt" ] || [ -L "$tgt" ]; then
-        if [ "$noclobber" -eq 1 ]; then
-            log_warn "Noclobber set and target exists, skipping: $tgt"
-            SKIPPED=$((SKIPPED + 1))
-            return 0
-        fi
-        bkp=$(backup_path "$tgt")
-        log_info "Backup: $tgt -> $bkp"
-        [ "$DRY_RUN" -eq 0 ] && mv "$tgt" "$bkp"
-        BACKED_UP=$((BACKED_UP + 1))
-    fi
+    _validate_and_prepare "$chmod_spec" "$tgt" || return 1
+    _maybe_backup "$tgt" "$noclobber" || return 0
 
     log_info "Create dir: $tgt"
-    if [ "$DRY_RUN" -eq 0 ]; then
-        mkdir -p "$tgt" || { log_error "Failed to create dir: $tgt"; FAILED=$((FAILED + 1)); return 1; }
-        if [ "$chmod_spec" != "-" ] && [ -n "$chmod_spec" ]; then
-            chmod "$chmod_spec" "$tgt" || { log_error "Failed to chmod: $tgt"; FAILED=$((FAILED + 1)); return 1; }
-        fi
-        apply_chown "$user_spec" "$group_spec" "$tgt" || return 1
-    fi
+    [ "$DRY_RUN" -eq 0 ] && { mkdir -p "$tgt" || { log_error "Failed to create dir: $tgt"; FAILED=$((FAILED + 1)); return 1; }; }
+    _apply_postop "$chmod_spec" "$user_spec" "$group_spec" "$tgt" || return 1
     CREATED=$((CREATED + 1))
 }
 
@@ -410,4 +378,8 @@ while IFS= read -r line || [ -n "$line" ]; do
     esac
 done < "$MANIFEST_PATH"
 
-log_info "Done. total=$TOTAL created=$CREATED updated=$UPDATED backups=$BACKED_UP skipped=$SKIPPED failed=$FAILED"
+if [ "$FAILED" -gt 0 ]; then
+    log_error "Done. total=$TOTAL created=$CREATED updated=$UPDATED backed-up=$BACKED_UP skipped=$SKIPPED failed=$FAILED"
+else
+    log_info "Done. total=$TOTAL created=$CREATED updated=$UPDATED backed-up=$BACKED_UP skipped=$SKIPPED failed=$FAILED"
+fi

@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
-# Strip comments from package list files
+# Strip comments and blank lines from a package list file.
+# The grep exits 1 when nothing matches (all-commented file), so we suppress that.
 strip_comments() {
-    sed 's/#.*$//g' "$1" | grep -v '^[[:space:]]*$'
+    sed 's/#.*$//g' "$1" | grep -v '^[[:space:]]*$' || true
 }
 
 echo -e "\033[0;32mInstalling packages from package lists...\033[0m"
@@ -23,7 +24,7 @@ if command -v brew &> /dev/null; then
 fi
 
 # Cargo (Rust)
-if command -v cargo &> \/dev\/null; then
+if command -v cargo &>/dev/null; then
     echo -e "\033[0;36mInstalling Cargo packages...\033[0m"
     if [ -f packages.cargo.txt ]; then
         cargo install $(strip_comments packages.cargo.txt)
